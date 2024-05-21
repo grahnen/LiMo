@@ -1,0 +1,10 @@
+# @object atomic-queue
+
+[1] call enq(a)
+[1] return
+[1] call enq(b)
+[1] return
+[1] call deq()
+[1] return b
+[1] call deq()
+[1] return a

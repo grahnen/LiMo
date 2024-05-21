@@ -1,0 +1,26 @@
+# A generalization of the non-trivial LIFO violation from
+# Dodds, Haas, Kirsch
+# POPL 2015: A Scalable, Correct Time-Stamped Stack
+# @object atomic-stack
+
+
+        [4] call push(c)
+
+            [6] call push(d)
+
+
+
+        [4] return
+
+
+            [6] return
+
+                        [7] call pop()
+
+
+                [8] call pop()
+
+
+                        [7] return c
+
+                [8] return d

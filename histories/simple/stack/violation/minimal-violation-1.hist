@@ -1,0 +1,3 @@
+# @object atomic-stack
+[1] call pop
+[1] return 1

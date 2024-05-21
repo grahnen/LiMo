@@ -1,0 +1,16 @@
+\call{1}{\push{a}}
+\call{2}{\pop}
+\ret{1}
+\ret[a]{2}
+\call{3}{\push{c}}
+\call{1}{\push{b}}
+\call{2}{\pop}
+\ret{1}
+\ret[b]{2}
+\ret{3}
+\call{3}{\pop}
+\call{4}{\push{d}}
+\ret[c]{3}
+\ret{4}
+\call{3}{\pop}
+\ret[d]{3}

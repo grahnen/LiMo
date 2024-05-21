@@ -1,0 +1,21 @@
+# @object atomic-queue
+[1] call deq
+[1] return empty
+[2] call deq
+[3] call deq
+[2] return empty
+[4] call enq(1)
+[4] return
+[5] call deq
+[5] return 1
+[6] call deq
+[6] return empty
+[3] return empty
+[7] call enq(2)
+[7] return
+[8] call enq(3)
+[8] return
+[9] call deq
+[10] call deq
+[10] return 3
+[9] return 2

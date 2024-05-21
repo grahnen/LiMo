@@ -1,0 +1,23 @@
+# @object atomic-stack
+[2] call push(0)
+[0] call pop
+[0] return
+[4] call push(3)
+[3] call push(2)
+[1] call pop
+[1] return
+[2] return
+[5] call pop
+[6] call pop
+[6] return
+[5] return 0
+[3] return
+[7] call push(1)
+[7] return
+[4] return
+[1] call pop
+[1] return 1
+[1] call pop
+[1] return 2
+[1] call pop
+[1] return 3
