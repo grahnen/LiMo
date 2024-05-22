@@ -1,0 +1,83 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{timeline}
+\RequirePackage{tikz}
+\RequirePackage{calc}
+\RequirePackage{etoolbox}
+\RequirePackage{xparse}
+
+\usetikzlibrary{calc}
+\newcounter{ctr}
+
+\newcommand{\hlstyle}{highlight}
+\newcommand{\defaultstyle}{}
+
+
+\newcommand{\call}[3][\defaultstyle]{%
+  \pgfkeyssetevalue{#2}{\thectr}
+  \pgfkeyssetevalue{#2f}{#3}
+  \pgfkeyssetevalue{#2ls}{#1}
+  \node[draw] at (\thectr, #2*\scale) (c\pgfkeysvalueof{#2}) {\thectr};%
+  \stepcounter{ctr}%
+
+}
+
+\newcommand{\breakcall}[1]{
+  \node at ($(\thectr, #1*\scale) + (0, \labelheight)$) (r\pgfkeysvalueof{#1}) {};
+  \draw (\thectr, #1*\scale - 0.5\scale) to (\thectr, #1*\scale + \scale);
+  \drawlabel{#1}
+}
+
+\newcommand{\drawlabel}[1]{
+  \node[\pgfkeysvalueof{#1ls}] at ($(c\pgfkeysvalueof{#1})!0.5!(r\pgfkeysvalueof{#1})+(0,\labelheight)$) (l\pgfkeysvalueof{#1}) {\pgfkeysvalueof{#1f}};
+  \draw (c\pgfkeysvalueof{#1}.north) |-
+  (l\pgfkeysvalueof{#1}.south);
+  \draw (l\pgfkeysvalueof{#1}.south) -|
+  (r\pgfkeysvalueof{#1}.north);
+}
+
+\NewDocumentCommand{\ret}{O{}m}{%
+  \node[draw] at (\thectr, #2*\scale) (r\pgfkeysvalueof{#2}) {\thectr};%
+  \ifblank{#1}{}{%
+    \pgfkeyssetevalue{#2f}{\ensuremath{\pgfkeysvalueof{#2f} \to #1}}%
+  }%
+  \drawlabel{#2}%
+  \stepcounter{ctr}%
+}
+
+\newcommand{\add}[1]{%
+  +~#1
+}
+
+\newcommand{\rmv}[1]{%
+  -~#1
+}
+
+% \NewDocumentCommand{\pop}{ O{} }{%
+%   \ifblank{#1}{%
+%     \ensuremath{pop}%
+%   }{%
+%     \ensuremath{pop(#1)}%
+%   }%
+% }
+
+\newcommand{\pop}[1]{%
+  \ensuremath{pop(#1)}
+}
+
+\newcommand{\push}[1]{%
+  \ensuremath{push(#1)}
+}
+
+
+
+\newenvironment{timeline}
+{
+  \setcounter{ctr}{1}
+  \edef\scale{2}
+  \edef\labelheight{0.75}
+  \begin{tikzpicture}
+  \tikzstyle{highlight} = [draw, ellipse, inner sep=0.5, outer sep = 1]
+} %begin
+{
+  \end{tikzpicture}
+} %end

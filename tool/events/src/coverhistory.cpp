@@ -13,10 +13,28 @@ void CoverHistory::add_pop_call(event_t &call) {
 
 void CoverHistory::add_crash(event_t &crash){
   std::map<tid_t, event_t> m_op(open.begin(), open.end());
+  std::set<CoverVal *> returned;
   for(auto &i : m_op) {
      event_t &call = i.second;
      event_t ev = event_t::create(Ereturn, i.first, {});
      add_ret(ev, true);
+  }
+
+
+  AtomicInterval ai = cover_bounds();
+  std::set<CoverVal> tmp(values.begin(), values.end());
+  for(auto &it : values) {
+    if(it.pop_crash) {
+      if (ai.ubound <= it.add.lbound) {
+        // Maximal push
+        std::cout << it.val << "Is maximal" << std::endl;
+        it.pop_crash = false; // We keep it
+      } else {
+        std::cout << "Removing Pop " << it.val << std::endl;
+        it.rmv = AtomicInterval::end();
+        it.pop_crash = false;
+      }
+    }
   }
   era++;
 }
