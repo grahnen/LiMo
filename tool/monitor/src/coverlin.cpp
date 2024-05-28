@@ -15,8 +15,8 @@ std::vector<CoverHistory> CoverHistory::guesses() {
       safe.insert(it);
   }
 
-  std::cout << crashed.size() << " crashed values" << std::endl;
-  std::cout << safe.size() << " safe values" << std::endl;
+  // std::cout << crashed.size() << " crashed values" << std::endl;
+  // std::cout << safe.size() << " safe values" << std::endl;
 
   CoverHistory base;
   for(auto it : safe)
@@ -31,7 +31,7 @@ std::vector<CoverHistory> CoverHistory::guesses() {
     }
     hists = nres;
   }
-  std::cout << "There are " << hists.size() << " histories" << std::endl;
+  //std::cout << "There are " << hists.size() << " histories" << std::endl;
   return hists;
 }
 
@@ -75,7 +75,7 @@ CoverHistory::LinRes CoverHistory::check_durable() {
   std::vector<CoverHistory> hists = guesses();
   int i = 0;
   for(auto h : hists) {
-    std::cout << "Checking guess " << i << std::endl;
+    //std::cout << "Checking guess " << i << std::endl;
     i++;
     LinRes lr = h.step();
     while (!lr.violation() && lr.remaining.size() > 0) {

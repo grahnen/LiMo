@@ -4,6 +4,8 @@
 #include "monitor.hpp"
 #include "monitor/graph.hpp"
 
+using VP = std::pair<val_t, val_t>;
+
 class GraphMonitor : public Monitor {
     private:
         tid_t max_threads;
@@ -26,6 +28,8 @@ class GraphMonitor : public Monitor {
 
         void print_state() const;
         void do_linearization();
+        void add_cmps(std::vector<VP> &cmps, Accessor &a, val_t v);
+        void make_cmp(std::vector<VP> &cmps, VP pair, Accessor &a);
 };
 
 #endif // GRAPHMONITOR_H_
