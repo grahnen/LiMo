@@ -3,9 +3,9 @@
 #include <atomic>
 
 
-std::atomic<timestamp_t> gts = 1;
+timestamp_t gts = 1;
 timestamp_t get_ts() {
-    return gts.fetch_add(1);
+    return gts++;
 }
 
 struct Node {
@@ -50,7 +50,7 @@ struct SPPool {
         bool f = false;
         if(n->mark.compare_exchange_strong(f, true)) {
             Node *tmp = oldTop;
-            top.compare_exchange_strong(oldTop, n);
+            top.compare_exchange_strong(tmp, n);
             if(oldTop != n) {
                 oldTop->next = n;
             }
@@ -116,10 +116,6 @@ public:
             SPPool *pool;
             Node *top;
             Node *empty[threads];
-
-            for(tid_t i = 0; i < threads; i++) {
-                empty[i] = nullptr;
-            }
 
             for(tid_t i = 0; i < threads; i++) {
                 SPPool &c = pools[i];

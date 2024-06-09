@@ -295,7 +295,7 @@ void ConstraintGraph::remove(val_t v) {
     for(tid_t t = 0; t < max_t + 1; t++) {
         if(n.pred[t] > MINIDX) {
             // DISCONNECT SUCCESSOR
-            //
+
             node_t &pre = nodes[t][n.pred[t]];
             pre.succ[v.thread] = MAXIDX; //n.succ[v.thread];
             // if(n.succ[v.thread] < MAXIDX) {
@@ -434,7 +434,6 @@ void ConstraintGraph::join_path(val_t cause, tid_t t1, index_t i1, tid_t t2, ind
 void node_t::add_candidate(tid_t thread, val_t v) {
     if(!first[thread].has_value())
         first[thread] = v;
-
     last[thread] = v;
 }
 

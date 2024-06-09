@@ -98,17 +98,16 @@ void GraphMonitor::handle_ret_rmvEmpty(event_t &ev) {
     // rmvEmpties[ev.thread] = {};
 }
 
-
 void GraphMonitor::add_cmps(std::vector<std::pair<val_t, val_t>> &cmps, Accessor &a, val_t v) {
     auto &vv = a[v.thread][v.idx];
     std::set<val_t> nconc;
-    for(auto cvl : vv.conc) {
+    for(auto cvl : vv.conc) { // O(k)
         auto &cc = a[cvl.thread][cvl.idx];
-        int n = vv.overlaps(cc);
+        int n = vv.overlaps(cc); // O(1)
         if(n == 1) {
             cmps.push_back(VP(v, cvl));
             // We enqueue their comparisons, and we remove their concurrency
-            cc.conc.erase(v);
+            cc.conc.erase(v); // O(log k)...
         } else {
             nconc.insert(cvl);
         }
@@ -170,81 +169,20 @@ void GraphMonitor::make_cmp(std::vector<VP> &cmps, VP pair, Accessor &a) {
 }
 
 void GraphMonitor::do_linearization() {
-    graph.close_open(rmv_order);
-    Accessor a = graph.segment_nodes();
+    graph.close_open(rmv_order); // O(k)
+    Accessor a = graph.segment_nodes(); // O(n)
 
     std::vector<VP> cmps;
-    for(auto v : rmv_order) {
-        add_cmps(cmps, a, v);
+    for(auto v : rmv_order) { // O(n)
+        add_cmps(cmps, a, v); // O(k log k)
     }
-
-    while(!cmps.empty()) {
+    // Number of values that *can* be added to cmps is O(n * k)..
+    while(!cmps.empty()) { // O(n * k)
         VP el = *cmps.rbegin();
         cmps.pop_back();
+        // O(1)
         make_cmp(cmps, el, a);
     }
-
-    // std::vector<val_t> modified(rmv_order.begin(), rmv_order.end());
-    // while(!modified.empty()) {
-    //     val_t vvl = *modified.rbegin();
-    //     modified.pop_back();
-    //     //std::cout << "Handling " << vvl << std::endl;
-    //     auto &v = a[vvl.thread][vvl.idx];
-    //     //std::cout << "... begin" << std::endl;
-    //     for(auto &cvl : v.conc) {
-    //         if(vvl.thread == cvl.thread && vvl.idx == cvl.idx)
-    //             continue;
-    //         //std::cout << "... checking " << cvl << std::endl;
-    //         auto &c = a[cvl.thread][cvl.idx];
-    //         //std::cout << "... go" << std::endl;
-    //         int n = v.overlaps(c);
-    //         //std::cout << "... " << n << std::endl;
-    //         if(n == 1) {
-    //             // We have four cases for the one overlap
-    //             // std::cout << "... " << v.original_val << " and " << cvl << " overlap" << std::endl;
-    //             // std::cout << vvl << ": " << v.addI() << ", " << v.rmvI() << std::endl;
-    //             // std::cout << cvl << ": " << c.addI() << ", " << c.rmvI() << std::endl;
-    //             AtomicInterval
-    //                 av = v.addI(),
-    //                 rv = v.rmvI(),
-    //                 ac = c.addI(),
-    //                 rc = c.rmvI();
-
-
-    //             if(av.overlaps(ac)) {
-    //                 if(rv.preceeds(rc)) {
-    //                     v.add_call = std::max(v.add_call, c.add_call);
-    //                     c.add_ret = std::min(v.add_ret, c.add_ret);
-    //                 } else {
-    //                     c.add_call = std::max(v.add_call, c.add_call);
-    //                     v.add_ret = std::min(v.add_ret, c.add_ret);
-    //                 }
-    //             } else if(av.overlaps(rc)) {
-    //                 v.add_call = std::max(v.add_call, c.rmv_call);
-    //                 c.rmv_ret = std::min(c.rmv_ret, v.add_ret);
-    //             } else if (ac.overlaps(rv)) {
-    //                 c.add_call = std::max(c.add_call, v.rmv_call);
-    //                 v.rmv_ret = std::min(v.rmv_ret, c.add_ret);
-    //             } else if (rv.overlaps(rc)) {
-    //                 if(av.preceeds(ac)) {
-    //                     c.rmv_ret = std::min(c.rmv_ret, v.rmv_ret);
-    //                     v.rmv_call = std::max(v.rmv_call, c.rmv_call);
-    //                 } else {
-    //                     v.rmv_ret = std::min(v.rmv_ret, c.rmv_ret);
-    //                     c.rmv_call = std::max(c.rmv_call, v.rmv_call);
-    //                 }
-    //             }
-
-    //             if(av != v.addI() || rv != v.rmvI())
-    //                 modified.push_back(vvl);
-    //             if(ac != c.addI() || rc != c.rmvI())
-    //                 modified.push_back(cvl);
-
-    //             // std::cout << vvl << ": " << v.addI() << ", " << v.rmvI() << std::endl;
-    //             // std::cout << cvl << ": " << c.addI() << ", " << c.rmvI() << std::endl;
-    //         }
-    //     }
-    // }
 
     for(auto &vvl : rmv_order) {
         auto &v = a[vvl.thread][vvl.idx];

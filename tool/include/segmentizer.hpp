@@ -9,7 +9,7 @@ struct seg_node {
     tid_t thread;
     index_t index;
     timestamp_t add_call, add_ret, rmv_call, rmv_ret;
-    std::set<val_t> conc;
+    std::set<val_t> conc; // Save None to skip removal complexity
     optval_t original_val;
     AtomicInterval addI() { return AtomicInterval::closed(add_call, add_ret); }
     AtomicInterval rmvI() { return AtomicInterval::closed(rmv_call, rmv_ret); }
