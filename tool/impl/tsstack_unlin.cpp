@@ -3,7 +3,9 @@
 #include <atomic>
 
 
+//std::atomic<timestamp_t> gts = 1;
 timestamp_t gts = 1;
+
 timestamp_t get_ts() {
     return gts++;
 }
@@ -34,6 +36,7 @@ struct SPPool {
 
     Node *insert(val_t v) {
         Node *n = mkNode(v, false);
+        n->ts = get_ts();
         n->next = top;
         top = n;
 
@@ -51,6 +54,7 @@ struct SPPool {
         if(n->mark.compare_exchange_strong(f, true)) {
             Node *tmp = oldTop;
             top.compare_exchange_strong(tmp, n);
+
             if(oldTop != n) {
                 oldTop->next = n;
             }
@@ -79,10 +83,6 @@ struct SPPool {
 
 };
 
-
-
-timestamp_t get_timestamp() { return 0; }
-
 class TSStack {
 public:
         tid_t threads;
@@ -97,7 +97,6 @@ public:
         void Push(val_t v, tid_t t) {
             SPPool &pool = pools[t];
             Node *n = pool.insert(v);
-            n->ts = get_ts();
         }
 
         res_t Pop() {
@@ -116,6 +115,10 @@ public:
             SPPool *pool;
             Node *top;
             Node *empty[threads];
+
+            for(tid_t i = 0; i < threads; i++) {
+                empty[i] = nullptr;
+            }
 
             for(tid_t i = 0; i < threads; i++) {
                 SPPool &c = pools[i];
