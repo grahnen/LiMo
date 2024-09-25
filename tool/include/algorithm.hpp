@@ -3,11 +3,13 @@
 #include "monitor.hpp"
 #include "monitor/persistent.hpp"
 #include "monitor/graphmonitor.hpp"
+#include "monitor/data_monitor.hpp"
 
 enum Algorithm : int {
 interval,
 segment,
-cover
+cover,
+data_monitor,
 };
 
 #define DefaultAlgorithm Algorithm::interval
@@ -17,6 +19,9 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
     return new GraphMonitor(mc);
   if(alg == cover)
     return new PersistentMonitor(mc);
+  if(alg == data_monitor) {
+    return new DataMonitor(mc);
+  }
 
   throw std::logic_error("Unknown algorithm!");
   return nullptr;
@@ -31,6 +36,8 @@ std::istream& operator>>(std::istream& in, Algorithm &alg) {
     alg = interval;
   else if (token == "segment")
     alg = segment;
+  else if (token == "data")
+    alg = data_monitor;
   else
     in.setstate(std::ios_base::failbit);
 
@@ -47,6 +54,9 @@ std::ostream &operator<<(std::ostream &os, Algorithm &alg) {
       break;
     case cover:
       os << "cover";
+      break;
+    case data_monitor:
+      os << "data";
       break;
   }
   return os;
