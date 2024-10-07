@@ -15,6 +15,7 @@ public:
   void do_linearization();
   CoverMonitor(MonitorConfig mc);
   void print_state() const;
+  bool ADT_supported(ADT adt) { return adt == stack; }
 };
 
 #endif

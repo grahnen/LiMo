@@ -6,7 +6,6 @@
 
 
 class ProjectionMonitor {
-  
  public:
   // Sorted by increasing return time
   std::set<AtomicInterval> adds;

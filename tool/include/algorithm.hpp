@@ -1,9 +1,9 @@
+
 #ifndef ALGORITHM_H_
 #define ALGORITHM_H_
 #include "monitor.hpp"
-#include "monitor/persistent.hpp"
+#include "monitor/covermonitor.h"
 #include "monitor/graphmonitor.hpp"
-#include "monitor/data_monitor.hpp"
 
 enum Algorithm : int {
 interval,
@@ -18,10 +18,10 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
   if(alg == segment)
     return new GraphMonitor(mc);
   if(alg == cover)
-    return new PersistentMonitor(mc);
-  if(alg == data_monitor) {
-    return new DataMonitor(mc);
-  }
+    return new CoverMonitor(mc);
+  // if(alg == data_monitor) {
+  //   return new DataMonitor(mc);
+  // }
 
   throw std::logic_error("Unknown algorithm!");
   return nullptr;

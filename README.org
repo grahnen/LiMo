@@ -11,6 +11,8 @@ Compile the program by running the provided =compile.sh= script.
 For now, the tool contains two monitoring algorithms; =segment= and =cover=.
 The =segment= algorithm is =O(n \cdot k^5)=, and =cover= is =O(n^2)=, where =n= is input length and =k= is the number of threads.
 
+The former supports stacks and queues, while the latter (for now) only supports stacks.
+
 We have a proof of correctness for =cover=, but none yet for =segment=.
 * Running
 ** Single history
@@ -46,9 +48,9 @@ This program takes arguments =-i= and =-r= the same way as in execution testing.
 * Histories
 The first line of an input history should be
 #+begin_src text
-# @object [atomic-stack|...]
+# @object [atomic-stack|atomic-queue|...]
 #+end_src
-Where other data structures than atomic-stack are still work in progress.
+Where other data structures than the two mentioned above are still work in progress.
 Following this line, a sequence of lines of the form
 #+begin_src text
 [thread] event_type val

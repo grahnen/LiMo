@@ -4,7 +4,11 @@
 #include <iostream>
 #include "exception.h"
 
-CoverMonitor::CoverMonitor(MonitorConfig mc) : Monitor(mc) {}
+CoverMonitor::CoverMonitor(MonitorConfig mc) : Monitor(mc) {
+  if(!(mc.type & (stack))) {
+        throw std::logic_error("Unhandled ADT: " + ext2str(mc.type));
+    }
+}
 
 void CoverMonitor::handle_push(event_t &e) {
   history.add_push_call(e);

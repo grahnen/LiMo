@@ -3,6 +3,7 @@
 
 #include "monitor.hpp"
 #include "monitor/graph.hpp"
+#include "typedef.h"
 
 class GraphMonitor : public Monitor {
     private:
@@ -19,7 +20,7 @@ class GraphMonitor : public Monitor {
         DECLHANDLER(enq)
         DECLHANDLER(deq)
 
-
+        bool ADT_supported(ADT adt) { return adt == stack || adt == queue; }
     public:
         GraphMonitor(MonitorConfig mc);
         ~GraphMonitor();
