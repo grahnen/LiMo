@@ -4,12 +4,13 @@
 #include "monitor.hpp"
 #include "monitor/covermonitor.h"
 #include "monitor/graphmonitor.hpp"
+#include "monitor/treemonitor.hpp"
 
 enum Algorithm : int {
 interval,
 segment,
 cover,
-data_monitor,
+tree_monitor,
 };
 
 #define DefaultAlgorithm Algorithm::interval
@@ -19,9 +20,9 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
     return new GraphMonitor(mc);
   if(alg == cover)
     return new CoverMonitor(mc);
-  // if(alg == data_monitor) {
-  //   return new DataMonitor(mc);
-  // }
+  if(alg == tree_monitor) {
+    return new TreeMonitor(mc);
+  }
 
   throw std::logic_error("Unknown algorithm!");
   return nullptr;
@@ -36,8 +37,8 @@ std::istream& operator>>(std::istream& in, Algorithm &alg) {
     alg = interval;
   else if (token == "segment")
     alg = segment;
-  else if (token == "data")
-    alg = data_monitor;
+  else if (token == "tree")
+    alg = tree_monitor;
   else
     in.setstate(std::ios_base::failbit);
 
@@ -55,8 +56,8 @@ std::ostream &operator<<(std::ostream &os, Algorithm &alg) {
     case cover:
       os << "cover";
       break;
-    case data_monitor:
-      os << "data";
+    case tree_monitor:
+      os << "tree";
       break;
   }
   return os;
