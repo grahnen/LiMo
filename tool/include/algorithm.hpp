@@ -1,14 +1,16 @@
+
 #ifndef ALGORITHM_H_
 #define ALGORITHM_H_
 #include "monitor.hpp"
-#include "monitor/persistent.hpp"
+#include "monitor/covermonitor.h"
 #include "monitor/graphmonitor.hpp"
 #include "monitor/queuemonitor.hpp"
 
 enum Algorithm : int {
 interval,
 segment,
-cover
+cover,
+tree_monitor,
 };
 
 #define DefaultAlgorithm Algorithm::interval
@@ -36,6 +38,8 @@ std::istream& operator>>(std::istream& in, Algorithm &alg) {
     alg = interval;
   else if (token == "segment")
     alg = segment;
+  else if (token == "tree")
+    alg = tree_monitor;
   else
     in.setstate(std::ios_base::failbit);
 
@@ -52,6 +56,9 @@ std::ostream &operator<<(std::ostream &os, Algorithm &alg) {
       break;
     case cover:
       os << "cover";
+      break;
+    case tree_monitor:
+      os << "tree";
       break;
   }
   return os;

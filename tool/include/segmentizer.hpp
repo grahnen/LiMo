@@ -36,7 +36,6 @@ struct seg_node {
 };
 
 
-
 using Accessor = std::vector<std::vector<seg_node>>;
 
 using SegmentAccessor = std::vector<std::vector<Segmentation *>>;

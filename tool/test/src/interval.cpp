@@ -68,4 +68,10 @@ int main() {
 
   std::cout << (x + y) + z << std::endl;
   assert(((x + y) + z) == x + z);
+
+  std::cout << "Complement" << std::endl;
+  Interval q(std::vector {AtomicInterval::closed(1,4), AtomicInterval::closed(6, 11)});
+
+  std::cout << q << std::endl;
+  std::cout << q.complement() << std::endl;
 }

@@ -3,6 +3,7 @@
 #include "event.h"
 #include <functional>
 #include <map>
+#include <stdexcept>
 #include "util.h"
 
 #define HANDLER_DEF_HELPER(data,elem) void handle_##data##elem(event_t &)
@@ -47,7 +48,6 @@ class Monitor {
 
   virtual void print_state() const = 0;
   virtual void do_linearization() {};
-
 protected:
   bool verbose;
   std::ostream *output;

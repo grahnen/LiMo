@@ -115,7 +115,7 @@ constexpr bool operator==(const AtomicInterval &L, const AtomicInterval &R) {
 class Interval {
  public:
   Interval();
-  Interval(std::vector<AtomicInterval>);
+  Interval(std::vector<AtomicInterval>, bool sorted = true);
   static Interval nil();
   static Interval open(timestamp_t lbound, timestamp_t ubound);
   static Interval closed(timestamp_t lbound, timestamp_t ubound);

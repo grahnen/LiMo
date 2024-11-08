@@ -73,11 +73,16 @@ std::vector<CoverHistory> CoverHistory::add_branch(CoverVal it) {
 
 CoverHistory::LinRes CoverHistory::check_durable() {
   std::vector<CoverHistory> hists = guesses();
+  bool durable = false;
+  if (hists.size() > 1)
+    durable = true;
   int i = 0;
+  LinRes lr;
   for(auto h : hists) {
     //std::cout << "Checking guess " << i << std::endl;
     i++;
-    LinRes lr = h.step();
+    lr = h.step();
+    std::cout << lr.violation() << std::endl;
     while (!lr.violation() && lr.remaining.size() > 0) {
       auto oa = lr.remaining.back();
       lr.remaining.pop_back();
@@ -88,7 +93,10 @@ CoverHistory::LinRes CoverHistory::check_durable() {
       return lr;
   }
 
-  return LinRes("no guess works");
+  if(durable)
+    return LinRes("no guess works");
+  else
+    return lr;
 
 }
 
@@ -98,29 +106,35 @@ CoverHistory::LinRes CoverHistory::step() {
       case Epsilon:
         return LinRes();
       case PopEmpty: {
+        std::cout << "Doing PopEmpty" << std::endl;
         Interval opens = cover().complement();
-    
+        std::cout << cover() << std::endl;
+
         auto atoms = opens.atoms();
+
+        std::cout << opens << std::endl;
 
         auto first_match = [&](AtomicInterval empty) -> AtomicInterval {
           auto i = std::find_if(atoms.begin(), atoms.end(), [&](AtomicInterval opening) {
             return opening.overlaps(empty);
           });
-      
+
           if (i == atoms.end()) {
             return AtomicInterval::nil();
           } else {
+            std::cout << empty << " overlaps " << *i << std::endl;
             return *i;
           }
         };
-    
+
         std::vector<AtomicInterval> openings;
+        std::cout << empties << std::endl;
         std::transform(empties.begin(), empties.end(), std::back_inserter(openings), first_match);
         for (auto inter : openings) {
           if (inter.empty())
-            return LinRes("PopEmpty does not intersect an opening");
+            return LinRes("does not intersect an opening");
         }
-    
+
         Interval I(openings);
         std::vector<AtomicInterval> i_atoms = I.atoms();
         std::vector<CoverHistory> segments = segmentize(i_atoms.begin(), i_atoms.end());

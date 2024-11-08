@@ -2,6 +2,7 @@
 #include <ostream>
 #include <iostream>
 #include "exception.h"
+#include "interval.h"
 #include <algorithm>
 
 void CoverHistory::add_push_call(event_t &call) {
@@ -51,7 +52,7 @@ void CoverHistory::add_crash(event_t &crash){
 
 CoverHistory::LinRes CoverHistory::add_ret(event_t &ret, bool crash){
   if (!open.contains(ret.thread)) {
-    return LinRes("Return before call");
+    throw Violation("Return before call");
   }
   
   event_t &call = open[ret.thread];
@@ -81,12 +82,14 @@ CoverHistory::LinRes CoverHistory::add_ret(event_t &ret, bool crash){
       auto val =
         std::find_if(values.begin(), values.end(), eqval(v.value()));
 
+
       if (val == values.end()) {
         unmatched_removes[ret.val.value()] = op;
       } else {
+
         if (val->rmv != AtomicInterval::end()) {
-          std::cout << val->rmv << std::endl;
-          return LinRes("Multiple pops on value ");
+
+         throw Violation("Multiple pops on value " + ext2str(val->val));
         }
         val->rmv = op;
         val->pop_era = era;
@@ -123,6 +126,11 @@ Interval CoverHistory::cover() const {
   std::transform(values.begin(), values.end(), std::back_inserter(atoms),
 		 [](CoverVal v) { return v.cover(); });
 
+  if (!std::is_sorted(atoms.begin(), atoms.end(), [](AtomicInterval &a, AtomicInterval &b) {
+    return a.lbound < b.lbound;
+  })) {
+    std::cout << "ERROR: Array not sorted!" << std::endl;
+  }
   return Interval(atoms);
 }
 

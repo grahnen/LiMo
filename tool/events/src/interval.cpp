@@ -1,7 +1,9 @@
 #include "interval.h"
+#include "typedef.h"
 #include <cassert>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 std::string format_ts(timestamp_t ts) {
   if(ts == NEGINF)
@@ -23,7 +25,7 @@ std::ostream &operator<<(std::ostream &os, const AtomicInterval &I) {
 
 std::ostream &operator<<(std::ostream &os, const Interval &I) {
   std::vector<AtomicInterval> inter = I.atoms();
-  os << inter[0];
+  os << *inter.begin();
   for (auto i = inter.begin() + 1; i != inter.end(); i++) {
     os << " | ";
     os << *i;
@@ -70,7 +72,7 @@ bool Interval::overlaps(const Interval &o) const {
 Interval::Interval() : Interval(std::vector<AtomicInterval>()) {}
 
 /* Union of all intervals in vector */
-Interval::Interval(std::vector<AtomicInterval> atoms) {
+Interval::Interval(std::vector<AtomicInterval> atoms, bool sorted) {
   for (auto ai : atoms) {
     if(!ai.empty())
       this->intervals.push_back(ai);
@@ -80,10 +82,12 @@ Interval::Interval(std::vector<AtomicInterval> atoms) {
   }
   
   // Sort intervals
+  if(!sorted) {
   std::sort(intervals.begin(), intervals.end(),
             [](AtomicInterval &i, AtomicInterval &j) {
               return i.lbound < j.lbound;
 	    });
+  }
 
   // Merge intervals if possible
   int i = 0;
@@ -137,11 +141,17 @@ Interval Interval::closedopen(timestamp_t lbound, timestamp_t ubound) {
 }
 
 Interval Interval::complement() const {
-  Interval I({AtomicInterval::complete()});
-  for (auto atom : intervals) {
-    I = I * atom.complement();
+  std::vector<AtomicInterval> complements;
+  timestamp_t lb = NEGINF;
+  bool l_open = true;
+  for(auto i : atoms()) {
+    complements.push_back(AtomicInterval(l_open, lb, i.lbound, !i.l_open));
+    lb = i.ubound;
+    l_open = !i.u_open;
   }
-  return I;
+
+  complements.push_back(AtomicInterval(l_open, lb, POSINF, true));
+  return Interval(complements);
 }
 
 Interval Interval::operator+(const AtomicInterval &o) const {

@@ -121,7 +121,6 @@ class ConstraintGraph {
             ensure_thread(thread_count);
         }
         ~ConstraintGraph() {}
-
 };
 
 #endif // GRAPH_H_
