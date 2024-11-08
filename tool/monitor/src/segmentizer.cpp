@@ -5,6 +5,7 @@ std::vector<timestamp_t> seg_node::timestamps() const {
     return std::vector { add_call, add_ret, rmv_call, rmv_ret };
 }
 
+
 SegmentAccessor segmentize(std::vector<val_t> order, Accessor acc) {
     // std::vector<std::vector<SegmentBuilder *>> builders;
     // std::transform(acc.begin(), acc.end(), std::back_inserter(builders), [](std::vector<seg_node> nodes) {

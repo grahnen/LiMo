@@ -31,15 +31,7 @@ std::vector<CoverHistory> CoverHistory::guesses() {
     }
     hists = nres;
   }
-
-  for(auto &h : hists) {
-    h.empties = std::vector(empties.begin(), empties.end());
-  }
-
-  if(hists.size() > 1) {
-    std::cout << "There are " << hists.size() << " guesses for durable" << std::endl;
-  }
-
+  //std::cout << "There are " << hists.size() << " histories" << std::endl;
   return hists;
 }
 
@@ -87,6 +79,7 @@ CoverHistory::LinRes CoverHistory::check_durable() {
   int i = 0;
   LinRes lr;
   for(auto h : hists) {
+    //std::cout << "Checking guess " << i << std::endl;
     i++;
     lr = h.step();
     std::cout << lr.violation() << std::endl;
@@ -116,7 +109,7 @@ CoverHistory::LinRes CoverHistory::step() {
         std::cout << "Doing PopEmpty" << std::endl;
         Interval opens = cover().complement();
         std::cout << cover() << std::endl;
-    
+
         auto atoms = opens.atoms();
 
         std::cout << opens << std::endl;
@@ -125,7 +118,7 @@ CoverHistory::LinRes CoverHistory::step() {
           auto i = std::find_if(atoms.begin(), atoms.end(), [&](AtomicInterval opening) {
             return opening.overlaps(empty);
           });
-      
+
           if (i == atoms.end()) {
             return AtomicInterval::nil();
           } else {
@@ -133,7 +126,7 @@ CoverHistory::LinRes CoverHistory::step() {
             return *i;
           }
         };
-    
+
         std::vector<AtomicInterval> openings;
         std::cout << empties << std::endl;
         std::transform(empties.begin(), empties.end(), std::back_inserter(openings), first_match);
@@ -141,7 +134,7 @@ CoverHistory::LinRes CoverHistory::step() {
           if (inter.empty())
             return LinRes("does not intersect an opening");
         }
-    
+
         Interval I(openings);
         std::vector<AtomicInterval> i_atoms = I.atoms();
         std::vector<CoverHistory> segments = segmentize(i_atoms.begin(), i_atoms.end());

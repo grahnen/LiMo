@@ -28,21 +28,21 @@ struct node_t {
 };
 
 struct graph_t {
+    std::set<val_t> concurrent;
     tid_t SIZE;
     graph_t(tid_t sz) : SIZE(sz) {
         nodes.resize(SIZE);
         heads.resize(SIZE, {});
     }
-    std::set<val_t> concurrent;
     std::vector<std::vector<node_t>> nodes;
     std::vector<optidx> heads;
     std::vector<optidx> roots;
 
     void push_call(tid_t thr, index_t idx) {
-        nodes[thr].push_back(node_t(thr, idx));
         if(concurrent.contains(val_t(thr, idx))) {
             return;
         }
+        nodes[thr].push_back(node_t(thr, idx));
         nodes[thr][idx].succ.resize(SIZE, {});
         nodes[thr][idx].pred.resize(SIZE, {});
 

@@ -26,6 +26,7 @@ if __name__ == "__main__":
         f.write(preamble + content + postamble)
 
 
+    
 
     po = Popen(["pdflatex", out_file], stdout=PIPE)
     po.wait()

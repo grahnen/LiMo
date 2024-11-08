@@ -3,9 +3,11 @@
 #include <atomic>
 
 
-std::atomic<timestamp_t> gts = 1;
+//std::atomic<timestamp_t> gts = 1;
+timestamp_t gts = 1;
+
 timestamp_t get_ts() {
-    return gts.fetch_add(1);
+    return gts++;
 }
 
 struct Node {

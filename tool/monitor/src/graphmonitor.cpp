@@ -98,9 +98,110 @@ void GraphMonitor::handle_ret_rmvEmpty(event_t &ev) {
     // rmvEmpties[ev.thread] = {};
 }
 
+void GraphMonitor::add_cmps(std::vector<std::pair<val_t, val_t>> &cmps, Accessor &a, val_t v) {
+    auto &vv = a[v.thread][v.idx];
+    std::set<val_t> nconc;
+    for(auto cvl : vv.conc) { // O(k)
+        auto &cc = a[cvl.thread][cvl.idx];
+        int n = vv.overlaps(cc); // O(1)
+        if(n == 1) {
+            cmps.push_back(VP(v, cvl));
+            // We enqueue their comparisons, and we remove their concurrency
+            cc.conc.erase(v); // O(log k)...
+        } else {
+            nconc.insert(cvl);
+        }
+    }
+    vv.conc = nconc;
+}
+
+
+void GraphMonitor::make_cmp(std::vector<VP> &cmps, VP pair, Accessor &a) {
+    auto
+        &v = a[pair.first.thread][pair.first.idx],
+        &c = a[pair.second.thread][pair.second.idx];
+
+
+
+    AtomicInterval
+        av = v.addI(),
+        rv = v.rmvI(),
+        ac = c.addI(),
+        rc = c.rmvI();
+
+    if(v.overlaps(c) != 1) {
+        //std::cout << "Number of overlaps reduced!" << std::endl;
+        if(!valid(graph.adt(), av, rv, ac, rc))
+            throw Violation("Violation on " + ext2str(pair.first) + ", " + ext2str(pair.second));
+    }
+
+
+    if(av.overlaps(ac)) {
+        if(rv.preceeds(rc)) {
+            v.add_call = std::max(v.add_call, c.add_call);
+            c.add_ret = std::min(v.add_ret, c.add_ret);
+        } else {
+            c.add_call = std::max(v.add_call, c.add_call);
+            v.add_ret = std::min(v.add_ret, c.add_ret);
+        }
+    } else if(av.overlaps(rc)) {
+        v.add_call = std::max(v.add_call, c.rmv_call);
+        c.rmv_ret = std::min(c.rmv_ret, v.add_ret);
+    } else if (ac.overlaps(rv)) {
+        c.add_call = std::max(c.add_call, v.rmv_call);
+        v.rmv_ret = std::min(v.rmv_ret, c.add_ret);
+    } else if (rv.overlaps(rc)) {
+        if(av.preceeds(ac)) {
+            c.rmv_ret = std::min(c.rmv_ret, v.rmv_ret);
+            v.rmv_call = std::max(v.rmv_call, c.rmv_call);
+        } else {
+            v.rmv_ret = std::min(v.rmv_ret, c.rmv_ret);
+            c.rmv_call = std::max(c.rmv_call, v.rmv_call);
+        }
+    }
+
+    if(av != v.addI() || rv != v.rmvI()) {
+        add_cmps(cmps, a, pair.first);
+    }
+
+    if(ac != c.addI() || rc != c.rmvI())
+        add_cmps(cmps, a, pair.second);
+}
+
 void GraphMonitor::do_linearization() {
-    graph.close_open(rmv_order);
-    Accessor a = graph.segment_nodes();
-    SegmentAccessor sa = segmentize(rmv_order, a);
-    check_segments(graph.adt(), rmv_order, a, sa);
+    graph.close_open(rmv_order); // O(k)
+    Accessor a = graph.segment_nodes(); // O(n)
+
+    std::vector<VP> cmps;
+    for(auto v : rmv_order) { // O(n)
+        add_cmps(cmps, a, v); // O(k log k)
+    }
+    // Number of values that *can* be added to cmps is O(n * k)..
+    while(!cmps.empty()) { // O(n * k)
+        VP el = *cmps.rbegin();
+        cmps.pop_back();
+        // O(1)
+        make_cmp(cmps, el, a);
+    }
+
+    for(auto &vvl : rmv_order) {
+        auto &v = a[vvl.thread][vvl.idx];
+        for(auto &cvl : v.conc) {
+            auto &c = a[cvl.thread][cvl.idx];
+            AtomicInterval
+                ai = v.addI(),
+                ri = v.rmvI(),
+                av = c.addI(),
+                rv = c.rmvI();
+
+            if(!valid(graph.adt(), ai, ri, av, rv)) {
+                throw Violation("Unlin at end");
+            } else {
+                //std::cout << ai << ri << av << rv << " ok" << std::endl;
+            }
+        }
+    }
+
+    // SegmentAccessor sa = segmentize(rmv_order, a);
+    // check_segments(graph.adt(), rmv_order, a, sa);
 }

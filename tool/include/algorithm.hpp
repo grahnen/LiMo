@@ -4,7 +4,7 @@
 #include "monitor.hpp"
 #include "monitor/covermonitor.h"
 #include "monitor/graphmonitor.hpp"
-#include "monitor/treemonitor.hpp"
+#include "monitor/queuemonitor.hpp"
 
 enum Algorithm : int {
 interval,
@@ -18,10 +18,11 @@ tree_monitor,
 inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
   if(alg == segment)
     return new GraphMonitor(mc);
-  if(alg == cover)
-    return new CoverMonitor(mc);
-  if(alg == tree_monitor) {
-    return new TreeMonitor(mc);
+  if(alg == cover) {
+    if(mc.type == ADT::stack)
+      return new PersistentMonitor(mc);
+    if(mc.type == ADT::queue)
+      return new QueueMonitor(mc);
   }
 
   throw std::logic_error("Unknown algorithm!");
