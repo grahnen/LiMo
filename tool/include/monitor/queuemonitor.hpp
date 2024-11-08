@@ -1,5 +1,5 @@
-#ifndef Stack_MONITOR_H
-#define Stack_MONITOR_H
+#ifndef Queue_MONITOR_H
+#define Queue_MONITOR_H
 #include "interval.h"
 #include "monitor.hpp"
 #include "typedef.h"

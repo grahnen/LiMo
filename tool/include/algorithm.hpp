@@ -20,7 +20,7 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
     return new GraphMonitor(mc);
   if(alg == cover) {
     if(mc.type == ADT::stack)
-      return new PersistentMonitor(mc);
+      return new CoverMonitor(mc);
     if(mc.type == ADT::queue)
       return new QueueMonitor(mc);
   }
