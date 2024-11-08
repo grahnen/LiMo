@@ -3,6 +3,7 @@
 #include "monitor.hpp"
 #include "monitor/persistent.hpp"
 #include "monitor/graphmonitor.hpp"
+#include "monitor/queuemonitor.hpp"
 
 enum Algorithm : int {
 interval,
@@ -15,8 +16,12 @@ cover
 inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
   if(alg == segment)
     return new GraphMonitor(mc);
-  if(alg == cover)
-    return new PersistentMonitor(mc);
+  if(alg == cover) {
+    if(mc.type == ADT::stack)
+      return new PersistentMonitor(mc);
+    if(mc.type == ADT::queue)
+      return new QueueMonitor(mc);
+  }
 
   throw std::logic_error("Unknown algorithm!");
   return nullptr;

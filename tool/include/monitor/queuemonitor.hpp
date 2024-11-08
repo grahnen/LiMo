@@ -1,40 +1,32 @@
-#ifndef QUEUE_MONITOR_H
-#define QUEUE_MONITOR_H
+#ifndef Stack_MONITOR_H
+#define Stack_MONITOR_H
+#include "interval.h"
 #include "monitor.hpp"
-#include <vector>
-#include <ostream>
+#include "typedef.h"
+#include "util.h"
+#include "intervaltree.hpp"
 
-using Graph = std::map<val_t, std::set<val_t>>;
-
-
-struct op_node {
-  optval_t v;
-  bool add;
-  bool done;
-  std::map<tid_t, int> succ;
-  op_node(val_t v, bool add) : v(v), add(add), done(false), succ() {}
-  friend std::ostream &operator<<(std::ostream &o, const op_node &op);
-};
 
 class QueueMonitor : public Monitor {
 protected:
-  std::map<tid_t, int> last_finished_enq;
-  std::map<tid_t, int> last_finished_deq;
-  
-  std::map<tid_t, std::vector<op_node>> ops;
-  std::map<tid_t, event_t> callee;
+  using LinRes = LinearizationResult<bool>;
+  std::vector<AtomicInterval> outers;
 
-  void assume_has_vec(tid_t thr);
- public:
-  QueueMonitor(MonitorConfig mc);
-  
+  std::map<val_t, AtomicInterval> inner;
+  std::map<val_t, AtomicInterval> outer;
+
+  std::map<tid_t, val_t> active;
+  ItvTree queue_tree;
+
   DECLHANDLER(enq)
   DECLHANDLER(deq)
 
+  void add_val(val_t v);
+  void ensure_member(val_t v);
+public:
   void do_linearization();
+  QueueMonitor(MonitorConfig mc);
   void print_state() const;
 };
-
-bool is_cyclic(Graph g);
 
 #endif

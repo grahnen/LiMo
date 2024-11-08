@@ -81,7 +81,7 @@ struct event_placeholder {
 event_placeholder *events;
 
 struct data_t {
-  ADTImpl *stack;
+  ADTImpl *adt;
   int *values;
   int num_ops;
   tid_t tid;
@@ -101,6 +101,8 @@ void *thread_fn(void *arg) {
     val_t v = data->values[i];
     if(v == -1) {
       // Pop
+      //
+
       events[(2 * tid * data->num_ops) + (2 * i)] = event_placeholder {
       .ts = c,
       .type = Epop,
@@ -108,7 +110,7 @@ void *thread_fn(void *arg) {
       .tid = uid
     };
 
-      res_t vv = data->stack->rmv(tid);
+      res_t vv = data->adt->rmv(tid);
 
       cl::time_point r = cl::now();
       events[(2 * tid * data->num_ops) + (2 * i) + 1] = event_placeholder {
@@ -119,9 +121,12 @@ void *thread_fn(void *arg) {
     };
 
 
+
+
     } else if(v == 1) {
       //Push
       val_t val(tid, n++);
+
 
       events[(2 * tid * data->num_ops) + (2 * i)] = event_placeholder {
       .ts = c,
@@ -130,7 +135,7 @@ void *thread_fn(void *arg) {
       .tid = uid,
     };
       ctr++;
-      data->stack->add(val, tid);
+      data->adt->add(val, tid);
 
       cl::time_point r = cl::now();
       events[(2 * tid * data->num_ops) + (2 * i) + 1] = event_placeholder {
@@ -139,6 +144,8 @@ void *thread_fn(void *arg) {
       .v = std::nullopt,
       .tid = uid,
     };
+
+      
 
     } else {
       throw std::logic_error("Unknown value");
@@ -202,9 +209,10 @@ int main(int argc, char *argv[]) {
         std::shuffle(&array[t][0], &array[t][ops_per_thread], g);
 
 
-        // while(!list_valid(array[t], ops_per_thread)) {
-        //   std::shuffle(&array[t][0], &array[t][ops_per_thread], g);
-        // }
+        while(!list_valid(array[t], ops_per_thread)) {
+          std::shuffle(&array[t][0], &array[t][ops_per_thread], g);
+        }
+
       }
 
       //Monitor *m = (Monitor *) new ADTImplMonitor();
@@ -215,7 +223,7 @@ int main(int argc, char *argv[]) {
 
       for (tid_t i = 0; i < threads; i++) {
         data_t *data = new data_t {
-        .stack = s,
+        .adt = s,
         .values = array[i],
         .num_ops = ops_per_thread,
         .tid = i
@@ -233,7 +241,7 @@ int main(int argc, char *argv[]) {
 
 
       std::string adt;
-      if(s->adt == stack) {
+      if(s->adt == ADT::stack) {
         adt = "atomic-stack";
       } else {
         adt = "atomic-queue";
