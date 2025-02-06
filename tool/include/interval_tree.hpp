@@ -6,6 +6,8 @@
 
 class TreeNode;
 
+extern std::atomic<index_t> id_ctr;
+
 class Itv {
     public:
         AtomicInterval inner, outer;
@@ -19,13 +21,17 @@ class Itv {
         }
 };
 
+inline std::ostream &operator<<(std::ostream &os, Itv i) {
+    return os << "(" << i.outer.lbound << i.inner << i.outer.ubound << ")";
+}
+
 
 bool outer_ctn(TreeNode *node, Itv interval);
 
 struct TreeNode {
     Itv interval;
     std::optional<Itv> outer;
-
+    index_t id;
     bool dummy,left;
     TreeNode *l, *r;
     size_t size;
@@ -38,9 +44,7 @@ struct TreeNode {
         return new TreeNode(i, false);
     }
 
-
-
-    TreeNode(Itv i, bool dummy = true, TreeNode *l = nullptr, TreeNode *r = nullptr, bool left = true) : interval(i), outer({}), dummy(dummy), l(l), r(r), size(0),left(left) {
+    TreeNode(Itv i, bool dummy = true, TreeNode *l = nullptr, TreeNode *r = nullptr, bool left = true) : interval(i), outer({}), dummy(dummy), l(l), r(r), size(0),left(left), id(id_ctr++) {
         update();
     }
 
@@ -56,8 +60,10 @@ struct TreeNode {
     TreeNode *rot_right();
 
 
-    std::pair<TreeNode *, TreeNode *> disj_left();
-    std::pair<TreeNode *, TreeNode *> disj_right();
+    std::pair<TreeNode *, TreeNode *> disj_left(timestamp_t minimal_right_lb);
+    std::pair<TreeNode *, TreeNode *> disj_right(timestamp_t maximal_left_ub);
+
+    std::ostream &to_dot(std::ostream &os) const;
 
     double szbal() const { return ((double) (l == nullptr) ? 0 : l->size) / ((double) size); }
 
@@ -67,7 +73,9 @@ inline TreeNode *tree_add(TreeNode *root, TreeNode *i) {
     if( root == nullptr ) {
         return i;
     }
-    return root->add(i);
+    root = root->add(i);
+    //root->balance();
+    return root;
 }
 
 inline TreeNode *tree_rmv(TreeNode *root, Itv i) {

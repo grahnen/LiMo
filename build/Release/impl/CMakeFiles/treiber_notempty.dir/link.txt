@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libtreiber_notempty.a CMakeFiles/treiber_notempty.dir/treiber_notempty.cpp.o
+/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libtreiber_notempty.a

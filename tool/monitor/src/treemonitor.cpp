@@ -2,7 +2,23 @@
 #include "exception.h"
 #include "interval_tree.hpp"
 #include "monitor.hpp"
+#include "util.h"
+#include <cstdio>
 #include <vector>
+
+void write_dot(std::string filename, TreeNode *n) {
+    if(n == nullptr)
+        return;
+    std::fstream file;
+    file.open(filename, std::ios::out);
+
+    file << "digraph G {";
+    n->to_dot(file);
+    file << "}";
+
+    file.close();
+}
+
 
 TreeMonitor::TreeMonitor(MonitorConfig mc) : Monitor(mc), tree(nullptr) {}
 TreeMonitor::~TreeMonitor() {}
@@ -37,18 +53,27 @@ void TreeMonitor::handle_ret_pop(event_t &ev) {
 
     TreeNode *n = TreeNode::mk_real(i);
     tree = tree_add(tree, n);
+    if(verbose) {
+            write_dot(dot_dir + "/dot" + ext2str(dot_ctr) + ".dot", tree);
+            dot_ctr++;
+    }
 }
+
 
 void TreeMonitor::print_state() const {}
 void TreeMonitor::do_linearization() {
     std::vector<TreeNode *> trees;
     trees.push_back(tree);
-
+    TreeNode *t = nullptr;
     while(!trees.empty()) {
-        TreeNode *t = trees.back();
+        t = trees.back();
         trees.pop_back();
+        if(verbose) {
+            write_dot(dot_dir + "/dot" + ext2str(dot_ctr) + ".dot", t);
+            dot_ctr++;
+        }
 
-        if( t == nullptr ) {
+        if( t == nullptr || t->size == 1) {
             continue;
         }
 
@@ -68,12 +93,13 @@ void TreeMonitor::do_linearization() {
                     tp = tp->balance();
                     trees.push_back(tp);
                 } else {
-                    auto p = tree->l->disj_left();
+                    auto p = t->disj_left(t->r->interval.inner.lbound);
                     if(p.first == nullptr) {
-                        auto q = t->r->disj_right();
+                        auto q = t->disj_right(t->l->interval.inner.ubound);
                         if( q.first == nullptr ) {
                             throw Violation("Inseparable and no minmax!");
                         } else {
+
                             trees.push_back(q.first);
                             trees.push_back(q.second);
                         }

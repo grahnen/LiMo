@@ -8,6 +8,9 @@
 
 
 class TreeMonitor : public Monitor {
+
+        index_t dot_ctr = 0;
+
         std::map<tid_t, val_t> active;
         std::map<val_t, Itv> values;
 

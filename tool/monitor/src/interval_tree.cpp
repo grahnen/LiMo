@@ -1,5 +1,8 @@
 #include "interval_tree.hpp"
+#include "exception.h"
 #include <stdexcept>
+
+std::atomic<index_t> id_ctr = 0;
 
 bool outer_ctn(TreeNode *node, Itv interval) {
     if( node == nullptr || !node->outer.has_value() ) {
@@ -19,12 +22,30 @@ TreeNode *TreeNode::do_add(TreeNode *i) {
             r = i;
         } else {
             r = l;
+            r->left = false;
             l = i;
+            i->left = true;
         }
         return this;
     }
 
-    if( i->interval.inner.lbound < l->interval.inner.lbound ) {
+    if(i->interval.inner.ubound < interval.inner.lbound) {
+        i->left = true;
+        this->left = false;
+        return mk_dummy(i, this, true);
+    }
+
+    if(interval.inner.ubound < i->interval.inner.lbound) {
+        i->left = false;
+        this->left = true;
+        return mk_dummy(this,i, true);
+    }
+
+    if (i->interval.inner.lbound > r->interval.inner.lbound) {
+        i->left = false;
+        r = r->add(i);
+    }
+    else if( i->interval.inner.lbound < l->interval.inner.ubound) {
         i->left = true;
         l = l->add(i);
     } else {
@@ -32,33 +53,44 @@ TreeNode *TreeNode::do_add(TreeNode *i) {
         r = r->add(i);
     }
 
-    // Rebalance overlapping
-    if( l->interval.inner.contains(r->interval.inner) ) {
-        r->left = true;
-        return l->add(r);
-    }
-    if( r->interval.inner.contains(l->interval.inner) ) {
-        l->left = false;
-        return r->add(l);
-    }
+    // Rebalance overlapping..
+    // TODO Gives a stack overflow because this can be an idempotent operation
+    // When do we actually need it?
+    //
+    // if( l->dummy && l->interval.inner.contains(r->interval.inner) ) {
+    //     r->left = true;
+    //     TreeNode *res = l->add(r);
+    //     delete this;
+    //     return res;
+    // }
 
+    // if( r->dummy && r->interval.inner.contains(l->interval.inner) ) {
+    //     l->left = false;
+    //     TreeNode *res = r->add(l);
+    //     delete this;
+    //     return res;
+    // }
+
+    update();
     return this;
 }
 
 TreeNode *TreeNode::add(TreeNode *i) {
-    if( dummy || interval.inner.contains(i->interval.inner) ) {
+    if( dummy ) {
         TreeNode *n = do_add(i);
         n->update();
         return n;
     } else {
         if( interval.inner.lbound < i->interval.inner.lbound ) {
+            bool dir = left;
             left = true;
             i->left = false;
-            return TreeNode::mk_dummy(this, i, true);
+            return TreeNode::mk_dummy(this, i, dir);
         } else {
+            bool dir = left;
             left = false;
             i->left = true;
-            return TreeNode::mk_dummy(i, this, true);
+            return TreeNode::mk_dummy(i, this, dir);
         }
     }
 }
@@ -66,57 +98,90 @@ TreeNode *TreeNode::add(TreeNode *i) {
 TreeNode *TreeNode::rmv(Itv i) {
     if (interval == i) {
         if (dummy) {
-            throw std::logic_error("Removing dummy??");
+            if(l == nullptr && r == nullptr) {
+                throw std::logic_error("Dummy without children?");
+            } else if (l == nullptr) {
+                throw std::logic_error("Dummy without l?");
+            } else if (r == nullptr) {
+                throw std::logic_error("Dummy without r?");
+            }
         } else {
-            if ( l != nullptr || r != nullptr ) {
+            if (l != nullptr && r != nullptr) {
                 dummy = true;
                 update();
                 return this;
             }
+            else if ( l != nullptr || r != nullptr ) {
+                if(l != nullptr)
+                    return l;
+                return r;
+            } else {
+                delete this;
+                return nullptr;
+            }
         }
     }
 
-    if( l != nullptr && l->interval.inner.contains(i.inner) ) {
-        l = l->rmv(i);
-        update();
-        if (dummy && l == nullptr)
-            return r;
-    } else if( r != nullptr && r->interval.inner.contains(i.inner) ) {
+    if( r != nullptr && r->outer.has_value() && r->outer.value() == i ) {
         r = r->rmv(i);
+
+        if(r != nullptr) {
+            r->update();
+        }
         update();
-        if (dummy && r == nullptr)
+        if (dummy && r == nullptr) {
+            l->left = left;
+            TreeNode *res = l;
+            delete this;
             return l;
+        }
+    } else if( l != nullptr && l->outer.has_value() && l->outer.value() == i ) {
+        l = l->rmv(i);
+
+        if(l != nullptr) {
+            l->update();
+        }
+        update();
+        if (dummy && l == nullptr) {
+            r->left = left;
+            TreeNode *res = r;
+            delete this;
+            return r;
+        }
     } else {
+        throw Violation("Removing nothing???");
         throw std::logic_error("Removing nothing?");
         return this;
     }
 
-    if (l != nullptr && l->disjoint()) {
-        TreeNode *nl = l->add(r);
-        nl->update();
-        return nl;
-    }
-    if (r != nullptr && r->disjoint()) {
-        TreeNode *nr = r->add(l);
-        nr->update();
-        return nr;
-    }
-
-    update();
+    // if (l != nullptr && l->disjoint()) {
+    //     TreeNode *nl = l->add(r);
+    //     nl->update();
+    //     return nl;
+    // }
+    // if (r != nullptr && r->disjoint()) {
+    //     TreeNode *nr = r->add(l);
+    //     nr->update();
+    //     return nr;
+    // }
     return this;
 }
 
 
 bool TreeNode::disjoint() const {
-    return l != nullptr && r != nullptr && ! l->interval.inner.overlaps(r->interval.inner);
+    return l != nullptr &&
+        r != nullptr &&
+        ! l->interval.inner.overlaps(r->interval.inner);
 }
 
 
 TreeNode *TreeNode::rot_left() {
     TreeNode *root = r;
     this->r = root->l;
+    r->left = false;
     root->l = this;
     root->size = size;
+    left = true;
     this->update();
     root->update();
     return root;
@@ -125,8 +190,10 @@ TreeNode *TreeNode::rot_left() {
 TreeNode *TreeNode::rot_right() {
     TreeNode *root = l;
     this->l = root->r;
+    l->left = true;
     root->r = this;
     root->size = this->size;
+    left = false;
     update();
     root->update();
     return root;
@@ -161,26 +228,37 @@ TreeNode *TreeNode::balance() {
 
 void TreeNode::update() {
     if(dummy){
-        this->interval = AtomicInterval::closed(l->interval.inner.lbound, r->interval.inner.ubound);
-        // Find outer
-        if( dummy ) {
-            if ( outer_ctn(l, interval) ) {
-                if( outer_ctn(r, interval) ) {
-                    if (left) {
-                        outer = (r->outer->outer.ubound < l->outer->outer.ubound) ? l->outer : r->outer;
-                    } else {
-                        outer = (l->outer->outer.lbound < r->outer->outer.lbound) ? l->outer : r->outer;
-                    }
-                } else {
-                    outer = l->outer;
-                }
-            } else if (outer_ctn(r, interval)) {
-                outer = r->outer;
-            } else {
-                outer = {};
-            }
+        if (l == nullptr)
+            this->interval = r->interval;
+        else if (r == nullptr)
+            this->interval = l->interval;
+        else {
+            this->interval =
+                AtomicInterval::closed(
+                    l->interval.inner.lbound,
+                    std::max(l->interval.inner.ubound, r->interval.inner.ubound));
         }
+        // Find outer
+        if ( outer_ctn(l, interval) ) {
+            if( outer_ctn(r, interval) ) {
+                if (left) {
+                    outer = (l->outer->outer.ubound < r->outer->outer.ubound) ? r->outer : l->outer;
+                } else {
+                    outer = (l->outer->outer.lbound < r->outer->outer.lbound) ? l->outer : r->outer;
+                }
+            } else {
+                outer = l->outer;
+            }
+        } else if (outer_ctn(r, interval)) {
+            outer = r->outer;
+        } else {
+            outer = {};
+        }
+    } else {
+        outer = this->interval;
     }
+
+
     size = 1;
     if (l != nullptr) {
         size += l->size;
@@ -190,21 +268,28 @@ void TreeNode::update() {
     }
 }
 
-
-std::pair<TreeNode *, TreeNode *> TreeNode::disj_left() {
+std::pair<TreeNode *, TreeNode *> TreeNode::disj_left(timestamp_t minimal_right_lb) {
     if(l == nullptr)
         return std::pair(nullptr, this);
 
-    if(disjoint()) {
-        TreeNode *l = l;
+    if(disjoint() && l->interval.inner.ubound < minimal_right_lb) {
+        TreeNode *nl = l;
         this->l = nullptr;
         update();
-        return std::pair(l, this);
+
+        if(dummy) {
+            TreeNode *res = this->r;
+            res->left = left;
+            delete this;
+            return std::pair(nl, res);
+        }
+        return std::pair(nl, this);
     }
 
-    auto p = l->disj_left();
+    auto p = l->disj_left(std::min(minimal_right_lb, r->interval.inner.lbound));
     if(p.first != nullptr) {
-        l = p.second;
+        this->l = p.second;
+        this->l->update();
         update();
         return std::pair(p.first, this);
     }
@@ -212,23 +297,52 @@ std::pair<TreeNode *, TreeNode *> TreeNode::disj_left() {
     return std::pair(nullptr, this);
 }
 
-std::pair<TreeNode *, TreeNode *> TreeNode::disj_right() {
-    if(r == nullptr)
+std::pair<TreeNode *, TreeNode *> TreeNode::disj_right(timestamp_t maximal_left_ub) {
+    if(r == nullptr) {
         return std::pair(nullptr, this);
-
-    if(disjoint()) {
-        TreeNode *r = r;
+    }
+    if(disjoint() && r->interval.inner.lbound > maximal_left_ub) {
+        TreeNode *nr = r;
         this->r = nullptr;
         update();
-        return std::pair(r, this);
+        if(dummy) {
+            TreeNode *res = this->l;
+            res->left = left;
+            delete this;
+            return std::pair(nr, res);
+        }
+        return std::pair(nr, this);
     }
 
-    auto p = l->disj_right();
+    auto p = r->disj_right(std::max(maximal_left_ub, l->interval.inner.ubound));
     if(p.first != nullptr) {
-        r = p.second;
+        this->r = p.second;
+        this->r->update();
         update();
         return std::pair(p.first, this);
     }
 
     return std::pair(nullptr, this);
+}
+
+std::ostream &TreeNode::to_dot(std::ostream &os) const {
+    os << id
+       << "[label=\""
+       << interval
+       << (dummy ? "d" : "")
+       << (left ? "L" : "R")
+       << outer
+       << "\"]\n";
+
+    if( l != nullptr ) {
+        os << id << " -> " << l->id << ";\n";
+        l->to_dot(os);
+    }
+
+    if( r != nullptr ) {
+        os << id << " -> " << r->id << ";\n";
+        r->to_dot(os);
+    }
+
+    return os;
 }

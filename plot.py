@@ -62,7 +62,7 @@ if __name__=="__main__":
     for name, res in results.items():
         for alg,res2 in res.items():
             clr = "blue" if alg == "limousine" else "brown"
-            xaxis = sorted([r for r,v in res2.items() if len(v) > 0])
+            xaxis = sorted([r for r,v in res2.items() if len(v) > 10])
             yaxis = [res2[k] for k in xaxis]
             if len(yaxis) == 0:
                 continue

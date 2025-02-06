@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libbackoffelim.a CMakeFiles/backoffelim.dir/backoffelim.cpp.o
+/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libbackoffelim.a

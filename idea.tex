@@ -1,0 +1,48 @@
+% Created 2024-09-24 Tue 16:13
+% Intended LaTeX compiler: xelatex
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[cache=false]{minted}
+\author{Samuel Grahn}
+\date{\today}
+\title{Idea}
+\hypersetup{
+ pdfauthor={Samuel Grahn},
+ pdftitle={Idea},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.4 (Org mode 9.7.11)}, 
+ pdflang={English}}
+\usepackage{biblatex}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+A state consists of two integers, \(must\) and \(may\).
+\(must\) signifies the number of values that \textbf{must} be present at this event, and
+\(may\) signifies the number of values that \textbf{may} be present.
+
+A final state of monitoring consists of one state per event. Namely, \(s_{!c}\), \(s_{!r}\), \(s_{?c}\), \(s_{{?r}}\)
+
+Denote the minimum integer appearing in \(s_{{!c}}\) and \(s_{!r}\) by \(min_!\). similarly for \(max\), and for \(?\).
+e.g.
+
+a: [0,1][1,1][0,1][0,0]
+says that when push(a) is called, there are between 0 and 1 elements in the stack, and when it returns there is exactly 1 element in the stack. Similarly for pop.
+
+We say a value is compatible with a number \(n\) if
+\(n \in [min_!^a, max_!^a] \cap [ min_?^a, max_?^a]\).
+
+A chain \(c_n\) is a sequence of integers, with \(c_0 = 0\), such that each pair of consecutive numbers has a difference of at most 1.
+
+A history is linearizable iff there is sequence \((c_0, v_0), \dots, (c_n, v_n)\), equal in size to the history, such that
+\(c_0, \dots, c_n\) form a chain, and each \(v_i\) is compatible with \(c_i\).
+\end{document}

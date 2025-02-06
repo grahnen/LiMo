@@ -4,7 +4,7 @@
 N_THREADS=16
 
 #Build type. Mostly irrelevant
-type=Release
+type=Debug
 
 # Generate/update cmake build directory
 cmake -Htool -Bbuild/$type -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_BUILD_TYPE=$type

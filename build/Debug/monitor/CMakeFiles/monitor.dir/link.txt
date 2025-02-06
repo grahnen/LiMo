@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libmonitor.a CMakeFiles/monitor.dir/src/coverlin.cpp.o CMakeFiles/monitor.dir/src/covermonitor.cpp.o CMakeFiles/monitor.dir/src/graph.cpp.o CMakeFiles/monitor.dir/src/graphmonitor.cpp.o CMakeFiles/monitor.dir/src/interval_tree.cpp.o CMakeFiles/monitor.dir/src/monitor.cpp.o CMakeFiles/monitor.dir/src/segmentizer.cpp.o CMakeFiles/monitor.dir/src/treemonitor.cpp.o
+/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libmonitor.a

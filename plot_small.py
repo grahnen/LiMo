@@ -47,7 +47,7 @@ with open('violin_minimal.log', 'r') as f:
             save_result('Violin', *res)
 
 
-fig,axs = plt.subplots(2,2, figsize=(5, 4), layout='constrained')
+fig,axs = plt.subplots(2,2, figsize=(4.5,4.0), layout='constrained')
 
 impls = list(data.keys())
 cols = 2

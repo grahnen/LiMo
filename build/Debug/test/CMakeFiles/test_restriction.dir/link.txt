@@ -1,0 +1,1 @@
+/usr/bin/g++ -g -O3 -march=native -latomic -fcoroutines CMakeFiles/test_restriction.dir/src/restriction.cpp.o -o /home/grahnen/Build/LiMo/bin/test_restriction  /usr/lib/libboost_program_options.so.1.86.0 /home/grahnen/Build/LiMo/lib/libevents.a /home/grahnen/Build/LiMo/lib/liblogic.a

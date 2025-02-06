@@ -1,0 +1,2 @@
+/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libserial.a CMakeFiles/serial.dir/serial.cpp.o
+/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libserial.a

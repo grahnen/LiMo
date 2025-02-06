@@ -1,0 +1,4 @@
+#+title: On The Fly Cover
+
+* Using "height"
+Assume that we have a height range for each value.
