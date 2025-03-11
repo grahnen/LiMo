@@ -38,7 +38,7 @@ data = dd(lambda: dd( lambda: dd(lambda: dd(lambda: [])) ))
 def save_result(alg, impl, threads, ops, time):
     data[impl][alg][threads][ops].append(time)
 
-with open('limousine_result.csv', 'r') as f:
+with open('limo_result.csv', 'r') as f:
     for l in f.readlines():
         res = parse_result(l)
         if res[0] != "HWQueue" and res[1] < 50 and res[2] < 1000:
@@ -101,4 +101,4 @@ fig.get_layout_engine().set(rect=(0.0,0.1, 1.0, 0.75))
 leg = fig.legend(handletextpad=0.1, handles=h, labels=uniq, ncols=3, loc='upper center', bbox_to_anchor=(0.5, 0.2))
 leg.set_in_layout(False)
 
-plt.savefig(f"small.pgf")
+plt.savefig(f"minimal.pgf")

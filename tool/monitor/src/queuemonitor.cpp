@@ -54,7 +54,6 @@ void QueueMonitor::add_val(val_t v) {
     queue_tree.insert(n);
 }
 
-
 void QueueMonitor::print_state() const {
 
 }
@@ -65,7 +64,6 @@ void QueueMonitor::do_linearization() {
     compute_k(n);
 
     for(auto vl : outer) {
-
         std::cout << "Outer: " << vl.first << ": " << vl.second << std::endl;
         if(contains(n, vl.second)) {
             throw Violation("Unlinearizable: outer in cover!");

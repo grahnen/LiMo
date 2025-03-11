@@ -7,22 +7,36 @@
 #include "monitor/queuemonitor.hpp"
 
 enum Algorithm : int {
+undefined,
 interval,
 segment,
 cover,
 tree_monitor,
 };
 
-#define DefaultAlgorithm Algorithm::interval
+#define DefaultAlgorithm Algorithm::undefined
+
+inline Monitor *make_default(MonitorConfig mc) {
+  switch(mc.type) {
+    case ADT::queue:
+      return (Monitor *) new QueueMonitor(mc);
+    case ADT::stack:
+      return (Monitor *) new CoverMonitor(mc);
+  }
+  return nullptr;
+}
 
 inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc) {
+  if(alg == undefined) {
+    return make_default(mc);
+  }
   if(alg == segment)
-    return new GraphMonitor(mc);
+    return (Monitor *) new GraphMonitor(mc);
   if(alg == cover) {
     if(mc.type == ADT::stack)
-      return new CoverMonitor(mc);
+      return (Monitor *) new CoverMonitor(mc);
     if(mc.type == ADT::queue)
-      return new QueueMonitor(mc);
+      return (Monitor *) new QueueMonitor(mc);
   }
 
   throw std::logic_error("Unknown algorithm!");
@@ -63,6 +77,5 @@ std::ostream &operator<<(std::ostream &os, Algorithm &alg) {
   }
   return os;
 }
-
 
 #endif // ALGORITHM_H_

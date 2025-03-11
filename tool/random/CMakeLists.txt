@@ -5,7 +5,7 @@ project(random)
 find_package(MPI REQUIRED)
 
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 #Executables

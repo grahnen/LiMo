@@ -17,7 +17,7 @@ target_compile_features(linearize PUBLIC cxx_std_20)
 target_include_directories(linearize PUBLIC include PRIVATE include)
 
 #Boost
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 #Link Libs

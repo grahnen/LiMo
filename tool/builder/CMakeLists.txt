@@ -18,7 +18,7 @@ target_compile_features(builder PUBLIC cxx_std_20)
 target_include_directories(builder PUBLIC include PRIVATE src)
 
 #Boost
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 #Link Boost

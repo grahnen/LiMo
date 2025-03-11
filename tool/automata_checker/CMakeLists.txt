@@ -28,7 +28,7 @@ target_include_directories(automata_checker PUBLIC ${MPI_INCLUDE_PATH})
 
 
 #Boost
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 #Link Libs

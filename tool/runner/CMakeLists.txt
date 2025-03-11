@@ -23,8 +23,8 @@ target_link_libraries(runner PRIVATE Threads::Threads)
 target_include_directories(runner PUBLIC include PRIVATE src)
 
 #Boost
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 
 #Link Boost
-target_link_libraries(runner LINK_PUBLIC ${Boost_LIBRARIES} events monitor)
+target_link_libraries(runner LINK_PUBLIC ${Boost_LIBRARIES} events monitor atomic)

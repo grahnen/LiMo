@@ -24,8 +24,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 #add_compile_options(-O2 -g)
 #add_link_options(-O2 -g)
 
-add_compile_options(-O3 -march=native)
-add_link_options(-O3 -march=native -latomic)
+add_compile_options(-O3 -march=x86-64 -mtune=generic)
+add_link_options(-O3 -march=x86-64 -mtune=generic)
 
 include_directories(include)
 
@@ -52,6 +52,6 @@ foreach(IMPL ${IMPL_SRC})
 
   add_executable("run_${IMPL_NAME}" "runner/src/null.cpp")
   target_compile_features("run_${IMPL_NAME}" PUBLIC cxx_std_20)
-  target_link_libraries("run_${IMPL_NAME}" runner)
+  target_link_libraries("run_${IMPL_NAME}" runner atomic)
   target_link_libraries("run_${IMPL_NAME}" ${IMPL_NAME})
 endforeach()

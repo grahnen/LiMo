@@ -36,15 +36,19 @@ data = dd(lambda: dd( lambda: dd(lambda: dd(lambda: [])) ))
 def save_result(alg, impl, threads, ops, time):
     data[impl][alg][threads][ops].append(time)
 
-with open('limousine_result.csv', 'r') as f:
+with open('limo_result.csv', 'r') as f:
     for l in f.readlines():
         res = parse_result(l)
+        if res is None:
+            continue
         if res[0] != "HWQueue" and res[1] < 50:
             save_result('LiMo', *res)
 
 with open('violin_result.csv', 'r') as f:
     for l in f.readlines():
         res = parse_result(l)
+        if res is None:
+            continue
         if res[0] != "HWQueue" and res[1] < 50:
             save_result('Violin', *res)
 
@@ -84,11 +88,11 @@ print(handles)
 uniq = [
     "LiMo 8t", "Violin 8t",
     "LiMo 16t", "Violin 16t",
-    "LiMo 32t", "Violin 32t",
-#    "LiMo 64t", "Violin 64t",
+    "LiMo 32t", "Violin 32t"
 ]
 
 handles, labels = axes['MSQueue'].get_legend_handles_labels()
+print(labels)
 print(labels)
 
 
@@ -98,6 +102,7 @@ h = [handles[i] for i in order]
 
 fig.get_layout_engine().set(rect=(0.0,0.1, 1.0, 0.75))
 leg = fig.legend(handletextpad=0.1, handles=h, labels=uniq, ncols=3, loc='upper center', bbox_to_anchor=(0.5, 0.2))
+
 leg.set_in_layout(False)
 
-plt.savefig(f"combined.pgf")
+plt.savefig(f"comprehensive.pgf")

@@ -12,5 +12,6 @@ foreach(IMPL ${IMPL_SRC})
   target_include_directories(${IMPL_NAME} PUBLIC include
     PRIVATE "../oolin/src")
   target_compile_features(${IMPL_NAME} PUBLIC cxx_std_20)
+  target_link_libraries(${IMPL_NAME} PUBLIC atomic)
 
 endforeach()

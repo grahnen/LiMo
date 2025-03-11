@@ -27,7 +27,7 @@ bool get_options(int argc, char *argv[]) {
     desc.add_options()
       ("help,h", "Help")
       ("verbose,v", value(&verbose)->default_value(false)->implicit_value(true), "Verbose")
-      ("algorithm,a", value(&algorithm)->default_value(segment), "Algorithm")
+      ("algorithm,a", value(&algorithm)->default_value(undefined), "Algorithm")
       ("dotdir,d", value(&dot_dir)->default_value("dots"), "Dot graph output directory")
       ("input", value(&filename)->required(), "Input File");
 
