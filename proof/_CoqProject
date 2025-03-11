@@ -1,4 +1,0 @@
--R theories/ LiMo
--arg "-w all"
-
-theories/core.v
