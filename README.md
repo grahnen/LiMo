@@ -46,6 +46,7 @@ This program takes arguments `-i` and `-r` the same way as in execution testing.
 
 ## Histories
 The first line of an input history should be
+
 ``# @object [atomic-stack|atomic-queue|...]``
 
 Where other data structures than the two mentioned above are still work in progress.
@@ -54,17 +55,19 @@ Following this line, a sequence of lines of the form
 [thread] event
 ``
 where `thread` is an integer and `event` identifies the event, e.g. `call push(3)` or `return`. For instance, the following is a valid history.
-``
-# @object atomic-stack
+
+`` # @object atomic-stack
 [1] call push 1
 [2] call pop
 [1] return
 [2] return 1
 ``
+
 For more, see the histories directory, containing both simple histories for testing certain structured histories, and generated histories.
 Histories can be generated using the `run` tool
+
 ``
-  ./bin/run_IMPL [-m mode] [-s suite]  [-i increment] [-r repeats] output-file [-v]
+./bin/run_IMPL [-m mode] [-s suite]  [-i increment] [-r repeats] output-file [-v]
 ``
 
 Where `IMPL` is one of the stack implementations in the /impl/ directory.
