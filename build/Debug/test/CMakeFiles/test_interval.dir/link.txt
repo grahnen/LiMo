@@ -1,1 +1,0 @@
-/usr/bin/g++ -g -O3 -march=native -latomic -fcoroutines CMakeFiles/test_interval.dir/src/interval.cpp.o -o /home/grahnen/Build/LiMo/bin/test_interval  /usr/lib/libboost_program_options.so.1.86.0 /home/grahnen/Build/LiMo/lib/libevents.a /home/grahnen/Build/LiMo/lib/liblogic.a

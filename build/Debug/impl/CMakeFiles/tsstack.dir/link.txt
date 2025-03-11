@@ -1,2 +1,0 @@
-/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libtsstack.a CMakeFiles/tsstack.dir/tsstack.cpp.o
-/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libtsstack.a

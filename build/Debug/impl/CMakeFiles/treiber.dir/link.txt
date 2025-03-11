@@ -1,2 +1,0 @@
-/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/libtreiber.a CMakeFiles/treiber.dir/treiber.cpp.o
-/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/libtreiber.a

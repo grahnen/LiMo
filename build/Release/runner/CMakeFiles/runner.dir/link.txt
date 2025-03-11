@@ -1,2 +1,0 @@
-/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/librunner.a CMakeFiles/runner.dir/src/main.cpp.o CMakeFiles/runner.dir/src/null.cpp.o
-/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/librunner.a

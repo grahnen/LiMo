@@ -1,2 +1,0 @@
-/usr/bin/ar qc /home/grahnen/Build/LiMo/lib/liblogic.a CMakeFiles/logic.dir/src/bound.cpp.o CMakeFiles/logic.dir/src/relation.cpp.o CMakeFiles/logic.dir/src/term.cpp.o CMakeFiles/logic.dir/src/termio.cpp.o
-/usr/bin/ranlib /home/grahnen/Build/LiMo/lib/liblogic.a
