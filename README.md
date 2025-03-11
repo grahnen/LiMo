@@ -17,19 +17,29 @@ The algorithms in our PLDI paper "Efficient Linearizability Monitoring" are pres
 # Running
 ## Single history
 To check a history, execute
-``./bin/linearize -a [cover|segment] ./path/to/history.hist``
+
+``` sh
+./bin/linearize -a [cover|segment] ./path/to/history.hist
+```
 
 which checks the history `history.hist` for linearizability. Optionally append the argument `-v` for verbose output.
 ## Exhaustive testing
 All histories containing exactly `N` elements can be checked using
 
-``mpirun -a [cover|segment] ./bin/exhaustive N``
+``` sh
+mpirun -a [cover|segment] ./bin/exhaustive N
+```
+
 
 ## Random testing
 There are two methods of generating random tests; one consists of running a stack implementation, and the other consists of generating stack histories algorithmically.
 ### Execution testing
-Implementations are available in ``tool/impl/src/*.cpp``. For each, runner binaries will be compiled as
-``./bin/run_IMPL input output``
+Implementations are available in ``tool/impl/src/*.cpp``. For each implementation IMPL, runner binaries will be compiled as
+
+``` sh
+./bin/run_IMPL
+```
+
 which takes a number of arguments. The required input is a ``suite`` filename and an output filename.
 
 If run with the ``-m benchmark`` parameter, the generated histories will not be saved, but instead used as benchmarking tools. The results is recorded in output as json data.
@@ -56,19 +66,20 @@ Following this line, a sequence of lines of the form
 ``
 where `thread` is an integer and `event` identifies the event, e.g. `call push(3)` or `return`. For instance, the following is a valid history.
 
-`` # @object atomic-stack
+```
+# @object atomic-stack
 [1] call push 1
 [2] call pop
 [1] return
 [2] return 1
-``
+```
 
 For more, see the histories directory, containing both simple histories for testing certain structured histories, and generated histories.
 Histories can be generated using the `run` tool
 
-``
+``` sh
 ./bin/run_IMPL [-m mode] [-s suite]  [-i increment] [-r repeats] output-file [-v]
-``
+```
 
 Where `IMPL` is one of the stack implementations in the /impl/ directory.
 
