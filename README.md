@@ -1,5 +1,4 @@
 # Li(nearizability)Mo(nitor)
-
 A linearizability verifier for concurrent stacks, and a framework for implementing specialized monitors for arbitrary data structures.
 
 # Building
@@ -24,12 +23,21 @@ To check a history, execute
 
 which checks the history `history.hist` for linearizability. Optionally append the argument `-v` for verbose output.
 ## Exhaustive testing
-All histories containing exactly `N` elements can be checked using
+All histories containing exactly `N` values can be checked using
+``` sh
+mpirun ./bin/exhaustive -a <algoritm> -c <comparison algoritm> N
+```
+This runs <algoritm> and <comparison algoritm> on every history of size N, and counts how many histories that are i) linearizable, ii) unlinearizable, and iii) not agreed upon by the two algorithms.
+
+This is mostly used for developing *new* monitoring algorithms for which an existing monitor already exists.
+
+Note that it requires MPI, and that if run from within a docker container as the root user, you might need to run
 
 ``` sh
-mpirun -a [cover|segment] ./bin/exhaustive N
+mpirun --allow-run-as-root ./bin/exhaustive ...
 ```
 
+If you get a count of 0, then likely mpirun was only able to create one process. If so, add the argument =-np <k>= to =mpriun= to make sure at least one checker process is active.
 
 ## Random testing
 There are two methods of generating random tests; one consists of running a stack implementation, and the other consists of generating stack histories algorithmically.
@@ -53,6 +61,14 @@ Generated testing can be done by running
 ``mpirun ./bin/random <suite> <output>``
 
 This program takes arguments `-i` and `-r` the same way as in execution testing. It also takes the argument `-a algorithm`, where one can supply the monitoring algorithm to use.
+
+Note that it requires MPI, and that if run from within a docker container as the root user, you might need to run
+
+``` sh
+mpirun --allow-run-as-root ./bin/random ...
+```
+
+Make sure to check that mpirun was able to create more than one process. You can add the argument =-np <k>= to =mpriun= to make sure.
 
 ## Histories
 The first line of an input history should be
@@ -92,6 +108,9 @@ The monitoring algorithms are each represented by one instance of the `Monitor` 
 
 
 ## Extending
+Adding a new implementation of a data structure requires creating a cpp file in the =impl=-directory, in which you implement the ADTImpl class specified in =include/impl.h=.
+It requires four methods; a constructor, an add operation, a removal operation, and a destructor. The internal state of the implementation is available to the methods through the state void pointer. Create a struct in the heap and store whatever data you need there, and assign state as a pointer to it.
+
 Adding a new monitor for an existing data structure requires
 - Implementing it as a subclass of Monitor
 - Adding it to the `enum Algorithm` in `algorithm.hpp`, as well as adding it to the other functions in this file.
@@ -99,5 +118,3 @@ Adding a new monitor for an existing data structure requires
 Adding a new data structure requires
 - Modifying `macros.h` to add missing event types and operation types.
 - Creating a monitor for the structure.
-
-

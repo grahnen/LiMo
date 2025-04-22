@@ -19,7 +19,7 @@ mpl.rcParams.update({
     'pgf.rcfonts': False,
 })
 
-res_regex = re.compile('.*/(\w+)/[a-z]+(\d+)-(\d+)r(\d+)\.hist,(\d+\.\d+)')
+res_regex = re.compile(r'.*/(\w+)/[a-z]+(\d+)-(\d+)r(\d+)\.hist,(\d+\.\d+)')
 
 def parse_result(res):
     m = res_regex.match(res)
@@ -41,13 +41,13 @@ def save_result(alg, impl, threads, ops, time):
 with open('limo_result.csv', 'r') as f:
     for l in f.readlines():
         res = parse_result(l)
-        if res[0] != "HWQueue" and res[1] < 50 and res[2] < 1000:
+        if res[2] < 1000:
             save_result('LiMo', *res)
 
 with open('violin_result.csv', 'r') as f:
     for l in f.readlines():
         res = parse_result(l)
-        if res[0] != "HWQueue" and res[1] < 50 and res[2] < 1000:
+        if res[2] < 1000:
             save_result('Violin', *res)
 
 
@@ -72,7 +72,7 @@ for impl, res in data.items():
                 continue
 
             ymean = list(map(st.mean, yaxis))
-            yrel = list(map(lambda x: x / ymean[0], ymean))
+            yrel = list(map(lambda x: x / max(ymean[0], 0.0001), ymean))
 
             c_a = 0.6 if alg == 'LiMo' else 0.0
             c_b = 0.0 if alg == 'LiMo' else 0.6
