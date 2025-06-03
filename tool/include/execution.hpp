@@ -18,7 +18,12 @@ Configuration *hist_from_ints(int count, int *data) {
     return event_t(evt.t, evt.th, val_t(evt.th, 0), ts);
   });
 
-  Configuration *conf = new Configuration(history, ADT::stack, history.size(), true);
+  ADT adt = ADT::stack;
+  for(int i = 0; i < count; i++) {
+    if (data[i] == -1)
+      adt = ADT::durable_stack;
+  }
+  Configuration *conf = new Configuration(history, adt, history.size(), true);
   Configuration *simpl = simplify(conf);
   delete conf;
 

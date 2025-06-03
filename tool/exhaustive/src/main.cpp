@@ -34,6 +34,8 @@ index_t n_elements;
 int num_fixed;
 int num_sent;
 tid_t max_thr;
+int max_crashes;
+
 
 int gen_counts(int rank, int size, int num_inits) {
   int even_div = num_inits / (size - 1);
@@ -63,10 +65,10 @@ bool get_options(int argc, char *argv[]) {
       ("help,h", "Help")
       ("verbose,v", value(&verbose)->default_value(false)->implicit_value(true), "Verbose")
       ("algorithm,a", value(&alg)->default_value(Algorithm::segment), "Algorithm")
-      ("compare,c", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
+      ("compare,b", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
       ("max_thr,t", value(&max_thr)->default_value(MAX_THREADS), "Maximum thread count")
-      ("size", value(&n_elements)->required(), "Number of values");
-
+      ("size", value(&n_elements)->required(), "Number of values")
+      ("max_crashes,c", value(&max_crashes)->default_value(0), "Maximum number of crashes in history");
     positional_options_description pos;
     pos.add("size", 1);
     variables_map vm;
@@ -114,7 +116,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Comparison algorithm:\t" << cmp << std::endl;
     // Root process should be communication hub instead of a worker.
     // Make more than needed to lessen the impact of different inits generating different history counts
-    gens = create_inits(n_elements, (size - 1) * (size - 1) * 2, max_thr);
+    gens = create_inits(n_elements, (size - 1) * (size - 1) * 2, max_thr, max_crashes);
 
     num_each = gens[0].size();
     n_inits = gens.size();
@@ -159,6 +161,7 @@ int main(int argc, char *argv[]) {
 //  MPI_Bcast(&n_inits, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   MPI_Bcast(&num_each, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&max_crashes, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   int *init = rank == 0 ? nullptr : new int[num_each];
 
@@ -263,11 +266,13 @@ int main(int argc, char *argv[]) {
         // Acknowledgement
         MPI_Recv(init_v.data(), num_each, MPI_INT, 0, MESSAGE_DATA, MPI_COMM_WORLD, &status);
 
-
-        auto generator = create_generator_prepended(n_elements, init_v, INT_MAX, max_thr);
+        int num_crashes = std::count_if(init_v.begin(), init_v.end(), [](int i) {
+          return i == -1;
+        });
+        std::cout << "Generating with " << (max_crashes - num_crashes) << " crashes" << std::endl;
+        auto generator = create_generator_prepended(n_elements, init_v, INT_MAX, max_thr, max_crashes - num_crashes);
         while(generator) {
           std::vector<int> int_h = generator();
-
 
           Configuration *simpl = hist_from_ints(int_h);
           MonitorConfig mc;
