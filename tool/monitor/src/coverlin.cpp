@@ -82,7 +82,6 @@ CoverHistory::LinRes CoverHistory::check_durable() {
     //std::cout << "Checking guess " << i << std::endl;
     i++;
     lr = h.step();
-    std::cout << lr.violation() << std::endl;
     while (!lr.violation() && lr.remaining.size() > 0) {
       auto oa = lr.remaining.back();
       lr.remaining.pop_back();
@@ -106,13 +105,9 @@ CoverHistory::LinRes CoverHistory::step() {
       case Epsilon:
         return LinRes();
       case PopEmpty: {
-        std::cout << "Doing PopEmpty" << std::endl;
         Interval opens = cover().complement();
-        std::cout << cover() << std::endl;
 
         auto atoms = opens.atoms();
-
-        std::cout << opens << std::endl;
 
         auto first_match = [&](AtomicInterval empty) -> AtomicInterval {
           auto i = std::find_if(atoms.begin(), atoms.end(), [&](AtomicInterval opening) {
@@ -122,13 +117,12 @@ CoverHistory::LinRes CoverHistory::step() {
           if (i == atoms.end()) {
             return AtomicInterval::nil();
           } else {
-            std::cout << empty << " overlaps " << *i << std::endl;
             return *i;
           }
         };
 
         std::vector<AtomicInterval> openings;
-        std::cout << empties << std::endl;
+
         std::transform(empties.begin(), empties.end(), std::back_inserter(openings), first_match);
         for (auto inter : openings) {
           if (inter.empty())
