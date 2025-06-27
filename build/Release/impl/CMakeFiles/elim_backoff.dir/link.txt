@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libelim_backoff.a CMakeFiles/elim_backoff.dir/elim_backoff.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libelim_backoff.a

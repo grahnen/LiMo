@@ -1,4 +1,4 @@
-# @object atomic-stack
+# @object stack
 [1] call push(c)
 [1] return
 [1] call push(a)

@@ -13,7 +13,6 @@ struct AtomicInterval {
   AtomicInterval() : AtomicInterval(true, POSINF, NEGINF, true) {}
   AtomicInterval(bool left, timestamp_t lower, timestamp_t upper, bool right)
       : l_open(left), lbound(lower), ubound(upper), u_open(right) {}
-  
   AtomicInterval intersect(AtomicInterval &other) {
     timestamp_t lb, ub;
     bool lop, uop;
@@ -102,6 +101,13 @@ struct AtomicInterval {
     return L.lbound < R.lbound;
   }
 
+  friend bool operator<=(const AtomicInterval &L, const AtomicInterval& R)
+  {
+    return (L<R) || (L==R);
+  }
+
+  friend constexpr bool operator==(const AtomicInterval &L, const AtomicInterval &R);
+
   static AtomicInterval open(timestamp_t lbound, timestamp_t ubound);
   static AtomicInterval closed(timestamp_t lbound, timestamp_t ubound);
   static AtomicInterval openclosed(timestamp_t, timestamp_t);
@@ -111,6 +117,8 @@ struct AtomicInterval {
 constexpr bool operator==(const AtomicInterval &L, const AtomicInterval &R) {
   return L.lbound == R.lbound && L.ubound == R.ubound && L.l_open == R.l_open && L.u_open == R.u_open;
 }
+
+
 
 class Interval {
  public:

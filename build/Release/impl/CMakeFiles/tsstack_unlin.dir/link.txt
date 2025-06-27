@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libtsstack_unlin.a CMakeFiles/tsstack_unlin.dir/tsstack_unlin.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libtsstack_unlin.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libtreiber.a CMakeFiles/treiber.dir/treiber.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libtreiber.a

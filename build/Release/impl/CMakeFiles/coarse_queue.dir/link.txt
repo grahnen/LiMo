@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libcoarse_queue.a CMakeFiles/coarse_queue.dir/coarse_queue.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libcoarse_queue.a

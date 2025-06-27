@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
       m->add_event(e);
     }
     auto t2 = clk::now();
-    std::cout << "Time before post: " << (t2 - t) << std::endl;
+    // std::cout << "Time before post: " << (t2 - t) << std::endl;
     m->do_linearization();
     t2 = clk::now();
     lin_dur = t2 - t;

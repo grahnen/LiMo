@@ -1,0 +1,1 @@
+/usr/bin/g++ -O3 -DNDEBUG -latomic -O1 -g -march=x86-64 -mtune=generic -fcoroutines CMakeFiles/test_subsumption.dir/src/subsumption.cpp.o -o /mnt/d/Projects/LiMo/bin/test_subsumption  /usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.74.0 /mnt/d/Projects/LiMo/lib/libevents.a /mnt/d/Projects/LiMo/lib/liblogic.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libhwqueue.a CMakeFiles/hwqueue.dir/hwqueue.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libhwqueue.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/librunner.a CMakeFiles/runner.dir/src/main.cpp.o CMakeFiles/runner.dir/src/null.cpp.o
+/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/librunner.a

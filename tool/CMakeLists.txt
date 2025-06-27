@@ -18,14 +18,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 
 
 # Debugging compilation
-#add_compile_options(-fsanitize=address -g)
-#add_link_options(-fsanitize=address -g)
+# add_compile_options(-fsanitize=address -g)
+# add_link_options(-fsanitize=address -g)
 
-#add_compile_options(-O2 -g)
-#add_link_options(-O2 -g)
+add_compile_options(-O1 -g)
+add_link_options(-O1 -g)
 
-add_compile_options(-O3 -march=x86-64 -mtune=generic)
-add_link_options(-O3 -march=x86-64 -mtune=generic)
+add_compile_options(-O1 -march=x86-64 -mtune=generic)
+add_link_options(-O1 -march=x86-64 -mtune=generic)
 
 include_directories(include)
 

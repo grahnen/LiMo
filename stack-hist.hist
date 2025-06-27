@@ -1,0 +1,5 @@
+# @object stack
+[0] call push(0)
+[1] call pop
+[0] return
+[1] return 0
