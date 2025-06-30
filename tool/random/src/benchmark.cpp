@@ -129,6 +129,8 @@ int main(int argc, char *argv[]) {
     int *indices = new int[total_size * 4];
     double *benchmark_results = new double[n_configs * num_iters_per];
 
+    ExhaustiveGenerator exGen;
+
 
     std::random_device rd;
     std::mt19937_64 rng(rd());
@@ -146,7 +148,7 @@ int main(int argc, char *argv[]) {
 
             #if KEEP_ONLY_LIN
 
-            std::vector<int> history = create_single(cfg.values, cfg.threads, rng);
+            std::vector<int> history = exGen.create_single(cfg.values, cfg.threads, rng);
 
             conf = hist_from_ints(history);
 

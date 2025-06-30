@@ -254,6 +254,8 @@ int main(int argc, char *argv[]) {
   int *data = 0;
   int *displs = 0;
 
+  ExhaustiveGenerator exGen;
+
   std::vector<std::vector<int>> gens;
 
   if(rank == 0) {
@@ -271,7 +273,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Comparison algorithm:\t" << cmp << std::endl;
     // Root process should be communication hub instead of a worker.
     // Make more than needed to lessen the impact of different inits generating different history counts
-    gens = create_inits(n_elements, (size - 1) * (size - 1) * 2, max_thr);
+    gens = exGen.create_inits(n_elements, (size - 1) * (size - 1) * 2, max_thr);
 
     num_each = gens[0].size();
     n_inits = gens.size();
@@ -431,7 +433,7 @@ int main(int argc, char *argv[]) {
         MPI_Recv(init_v.data(), num_each, MPI_INT, 0, MESSAGE_DATA, MPI_COMM_WORLD, &status);
 
 
-        auto generator = create_generator_prepended(n_elements, init_v, INT_MAX, max_thr);
+        auto generator = exGen.create_generator_prepended(n_elements, init_v, INT_MAX, max_thr);
         std::vector<partitioning> Ps = get_partitions(n_elements);
         while(generator) {
           std::vector<int> int_h = generator();

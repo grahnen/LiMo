@@ -85,8 +85,10 @@ int main(int argc, char *argv[]) {
   mc.type = adt;
   mc.thread_count = max_threads;
 
+  ExhaustiveGenerator exGen;
+
   for(int i = 0; i < num_self; i++) {
-    std::vector<int> history = create_single(n_elements, max_threads, rng);
+    std::vector<int> history = exGen.create_single(n_elements, max_threads, rng);
     Configuration *conf = hist_from_ints(history);
     conf->type = adt;
     my_max_conc = std::max(my_max_conc, conf->num_threads);

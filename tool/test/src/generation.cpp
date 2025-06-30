@@ -1,16 +1,19 @@
 #include "generator.hpp"
 
 int main() {
+
+    ExhaustiveGenerator exGen;
+
     int size = 4;
     std::vector<std::vector<int>> inits;
     for(int i = 0; i < 8; i++) {
-        inits = create_inits(size, i);
+        inits = exGen.create_inits(size, i);
         std::cout << "min = " << i << " gives " << inits.size() << " histories" << std::endl;
     }
 
     std::vector<char> init;
     init.resize(size, 4);
-    auto hists = gen_histories(init);
+    auto hists = exGen.gen_histories(init);
 
     long long count = 0;
 
@@ -23,7 +26,7 @@ int main() {
     long long iter_count = 0;
 
     for(auto it : inits) {
-        auto hists = create_generator_prepended(size, it);
+        auto hists = exGen.create_generator_prepended(size, it);
         while(hists) {
             hists();
             iter_count++;

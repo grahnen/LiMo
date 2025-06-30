@@ -8,11 +8,11 @@
 
 Configuration *hist_from_ints(int count, int *data) {
   std::vector<event_t> history;
-  auto h = make_history(count, data);
+  auto h = ExhaustiveGenerator::make_history(count, data);
   tid_t ts = 0;
 
   tid_t max_t = 0;
-  std::transform(h.begin(), h.end(), std::back_inserter(history), [&ts, &max_t](ev_t evt) {
+  std::transform(h.begin(), h.end(), std::back_inserter(history), [&ts, &max_t](ExhaustiveGenerator::ev_t evt) {
     ts++;
     max_t = std::max(evt.th, max_t);
     return event_t(evt.t, evt.th, val_t(evt.th, 0), ts);
@@ -23,11 +23,18 @@ Configuration *hist_from_ints(int count, int *data) {
     if (data[i] == -1)
       adt = ADT::durable_stack;
   }
-  Configuration *conf = new Configuration(history, adt, history.size(), true);
-  Configuration *simpl = simplify(conf);
-  delete conf;
+  Configuration *conf = new Configuration(history, adt, history.size(), (adt == ADT::stack));
+  if(conf->needs_simpl)
+  {
+    Configuration *simpl = simplify(conf);
+    delete conf;
 
-  return simpl;
+    return simpl;
+  }
+  else
+  {
+    return conf;
+  }
 }
 
 
