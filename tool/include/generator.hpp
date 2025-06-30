@@ -11,6 +11,9 @@
 class ExhaustiveGenerator
 {
 public:
+	//Forward Declaration
+	struct ev_t;
+
 	enum HistoryType
 	{
 		NORMAL,
@@ -48,19 +51,19 @@ private:
 	{
 		std::vector<char> state;
 
-		bool check_done()
+		inline bool check_done()
 		{
 			return std::all_of(state.begin(), state.end(), [](char a)
 							   { return a == 0; });
 		}
 
-		void initialize(int size)
+		inline void initialize(int size)
 		{
 			state.clear();
 			state.resize(size, 4);
 		}
 
-		void update(int x)
+		inline void update(int x)
 		{
 			state[x]--;
 		}
@@ -107,6 +110,13 @@ private:
 			}
 
 			return pinds;
+		}
+	
+		inline ev_t getAndUpdate(int i)
+		{
+			ev_t e = evt(i, state[i]);
+			update(i);
+			return e;
 		}
 	};
 
@@ -382,36 +392,7 @@ public:
 		co_return;
 	}
 
-	template <typename StateType>
-	inline Generator<std::vector<int>> gen_histories(StateType state, tid_t max_conc = MAX_THREADS, int num_to_fix = -1, std::vector<int> prepend = std::vector<int>())
-	{
-		// std::cout << typeid(StateType).name() << std::endl;
-		if (
-			num_to_fix == 0 || // Partial finished
-			state.check_done() // Total Finished
-		)
-		{
-			co_yield prepend;
-			co_return;
-		}
-
-		// std::set<int> indices = possible_indices(state.state, max_conc);
-		std::set<int> indices = state.possible_indices(max_conc);
-		for (int i : indices)
-		{
-			// std::vector<char> s2(state.begin(), state.end());
-			normalState s2(state);
-			// s2[i]--;
-			s2.update(i);
-			auto gen = gen_histories(s2, max_conc, num_to_fix - 1);
-			while (gen)
-			{
-				co_yield combine(prepend, i, gen());
-			}
-		}
-		co_return;
-	}
-
+	
 	template <typename T>
 	inline T select_random(std::set<T> &set, std::mt19937_64 &rand)
 	{
@@ -498,25 +479,30 @@ public:
 
 	*/
 
+
+
 	static inline std::vector<ev_t> make_history(int size, int *events, int type = NORMAL)
 	{
-		std::vector<ev_t> out;
-		out.reserve(size * 4);
-		std::vector<char> initial;
-		initial.resize(size, 4);
-
-		for (int i = 0; i < size * 4; i++)
+		switch(type)
 		{
-			out.push_back(evt(events[i], initial[events[i]]));
-			initial[events[i]]--;
+			case NORMAL:
+				return make_history<normalState>(size, events);
+			default:
+				throw std::logic_error("Unimplemented");
 		}
-
-		return out;
+		return make_history(size, events,type);
 	}
 
 	static inline std::vector<ev_t> make_history(int size, std::vector<int> &events, int type = NORMAL)
 	{
-		return make_history(size, events.data());
+		switch(type)
+		{
+			case NORMAL:
+				return make_history<normalState>(size, events.data());
+			default:
+				throw std::logic_error("Unimplemented");
+		}
+		return make_history(size, events.data(),type);
 	}
 
 	inline std::vector<int> create_single(int size, tid_t max_threads, std::mt19937_64 &rand)
@@ -526,21 +512,18 @@ public:
 		return gen_single(initial, max_threads, rand);
 	}
 
+
 	inline Generator<std::vector<int>> create_generator_prepended(int size, std::vector<int> &events, int num_new = INT_MAX, tid_t max_threads = MAX_THREADS)
 	{
-		std::vector<int> prepend;
-		// std::vector<char> initial;
-		normalState initial;
-		initial.initialize(size);
-		// initial.resize(size, 4);
-		for (auto v : events)
+		switch(genHistoryType)
 		{
-			assert(v < initial.size());
-			prepend.push_back(v);
-			// initial[v]--;
-			initial.update(v);
+			case NORMAL:
+				return create_generator_prepended<normalState>(size, events, num_new, max_threads);
+			default:
+				throw std::logic_error("Unimplemented");
+				return create_generator_prepended<normalState>(size, events, num_new, max_threads);
+
 		}
-		return gen_histories(initial, max_threads, num_new, prepend);
 	}
 
 	// not used anywhere
@@ -573,7 +556,7 @@ public:
 			new_histories.clear();
 			for (auto h : histories)
 			{
-				auto gen = create_generator_prepended(size, h, 1, max_threads);
+				auto gen = create_generator_prepended<normalState>(size, h, 1, max_threads);
 				while (gen)
 					new_histories.push_back(gen());
 			}
@@ -603,6 +586,82 @@ public:
 			histories = new_histories;
 		}
 		return histories;
+	}
+
+
+
+private:
+	//These will mostly be templated functions. All calls to these must go through public functions, which call them with the correct type
+
+	template <typename StateType>
+	static inline std::vector<ev_t> make_history(int size, int *events)
+	{
+		std::vector<ev_t> out;
+		out.reserve(size * 4);
+		// std::vector<char> initial;
+		StateType initial;
+		// initial.resize(size, 4);
+		initial.initialize(size);
+
+		int i=0;
+
+		while(!initial.check_done())
+		{
+			// out.push_back(evt(events[i], initial[events[i]]));
+			// initial[events[i]]--;
+			out.emplace_back(initial.getAndUpdate(events[i]));
+			i++;
+		}
+
+		return out;
+	}
+
+	template <typename StateType>
+	inline Generator<std::vector<int>> gen_histories(StateType state, tid_t max_conc = MAX_THREADS, int num_to_fix = -1, std::vector<int> prepend = std::vector<int>())
+	{
+		// std::cout << typeid(StateType).name() << std::endl;
+		if (
+			num_to_fix == 0 || // Partial finished
+			state.check_done() // Total Finished
+		)
+		{
+			co_yield prepend;
+			co_return;
+		}
+
+		// std::set<int> indices = possible_indices(state.state, max_conc);
+		std::set<int> indices = state.possible_indices(max_conc);
+		for (int i : indices)
+		{
+			// std::vector<char> s2(state.begin(), state.end());
+			normalState s2(state);
+			// s2[i]--;
+			s2.update(i);
+			auto gen = gen_histories(s2, max_conc, num_to_fix - 1);
+			while (gen)
+			{
+				co_yield combine(prepend, i, gen());
+			}
+		}
+		co_return;
+	}
+
+	template<typename T>
+	inline Generator<std::vector<int>> create_generator_prepended(int size, std::vector<int> &events, int num_new = INT_MAX, tid_t max_threads = MAX_THREADS)
+	{
+		std::vector<int> prepend;
+		// std::vector<char> initial;
+		T initial;
+		initial.initialize(size);
+		// initial.resize(size, 4);
+		for (auto v : events)
+		{
+			assert(v < initial.size());
+			prepend.push_back(v);
+			// initial[v]--;
+			initial.update(v);
+		}
+		return gen_histories(initial, max_threads, num_new, prepend);
 	}
 };
 
