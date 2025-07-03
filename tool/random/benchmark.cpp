@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
         gen_random_indices(initial_state, indices, rand, cfg.threads);
 
-        Configuration *conf = hist_from_ints(cfg.pushes, indices);
+        Configuration *conf = hist_from_ints(total_size, cfg.pushes, indices);
         assert(conf->threads <= cfg.threads);
 
     }

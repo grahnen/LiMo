@@ -255,6 +255,7 @@ int main(int argc, char *argv[]) {
   int *displs = 0;
 
   ExhaustiveGenerator exGen;
+  ExhaustiveGenerator::HistoryType type = ExhaustiveGenerator::NORMAL;
 
   std::vector<std::vector<int>> gens;
 
@@ -385,7 +386,7 @@ int main(int argc, char *argv[]) {
           for(int i = 0; i < mm.size(); i++) {
             mm[i] = mismatch[i];
           }
-          Configuration *mis = hist_from_ints(mm);
+          Configuration *mis = hist_from_ints(n_elements, mm, type);
 
           write_file(&mis->history, "atomic-stack", "mismatches/" + std::to_string(mismatches) + ".hist");
           mismatches++;
@@ -396,7 +397,7 @@ int main(int argc, char *argv[]) {
           crash.resize(n_elements * 4);
           MPI_Recv(&crash[0], n_elements * 4, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
 
-          Configuration *mis = hist_from_ints(crash);
+          Configuration *mis = hist_from_ints(n_elements, crash, type);
           write_file(&mis->history, "atomic-stack", "crashes/" + std::to_string(crashes) + ".hist");
           crashes++;
         } else if (tag == MESSAGE_AUTOMATA_FAIL) {
@@ -405,7 +406,7 @@ int main(int argc, char *argv[]) {
             crash.resize(n_elements * 4);
             MPI_Recv(&crash[0], n_elements * 4, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
 
-            Configuration *mis = hist_from_ints(crash);
+            Configuration *mis = hist_from_ints(n_elements, crash, type);
             write_file(&mis->history, "atomic-stack", "fails/" + std::to_string(fails) + ".hist");
             fails++;
         }
@@ -439,7 +440,7 @@ int main(int argc, char *argv[]) {
           std::vector<int> int_h = generator();
 
 
-          Configuration *simpl = hist_from_ints(int_h);
+          Configuration *simpl = hist_from_ints(n_elements, int_h, type);
           bool rq2 = false;
 
           for(auto P : Ps) {

@@ -1,0 +1,226 @@
+[
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_backoffelim.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_backoffelim.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_coarse_queue.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_coarse_queue.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_coarse_stack.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_coarse_stack.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_elim_backoff.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_elim_backoff.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_elimbackoff.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_elimbackoff.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_hwqueue.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_hwqueue.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_msqueue.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_msqueue.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_serial.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_serial.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_treiber.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_treiber.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_treiber_notempty.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_treiber_notempty.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_tsstack.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_tsstack.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release",
+  "command": "/usr/bin/g++ -DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_DYN_LINK -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/runner/include -I/mnt/d/Projects/LiMo/tool/impl/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/run_tsstack_unlin.dir/runner/src/null.cpp.o -c /mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/runner/src/null.cpp",
+  "output": "CMakeFiles/run_tsstack_unlin.dir/runner/src/null.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/convert.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/convert.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/convert.cpp",
+  "output": "events/CMakeFiles/events.dir/src/convert.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/coverhistory.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/coverhistory.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/coverhistory.cpp",
+  "output": "events/CMakeFiles/events.dir/src/coverhistory.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/event.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/event.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/event.cpp",
+  "output": "events/CMakeFiles/events.dir/src/event.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/history.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/history.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/history.cpp",
+  "output": "events/CMakeFiles/events.dir/src/history.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/interval.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/interval.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/interval.cpp",
+  "output": "events/CMakeFiles/events.dir/src/interval.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/io.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/io.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/io.cpp",
+  "output": "events/CMakeFiles/events.dir/src/io.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/operation.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/operation.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/operation.cpp",
+  "output": "events/CMakeFiles/events.dir/src/operation.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/parser.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/parser.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/parser.cpp",
+  "output": "events/CMakeFiles/events.dir/src/parser.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/preproces.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/preproces.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/preproces.cpp",
+  "output": "events/CMakeFiles/events.dir/src/preproces.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/stackUnknownHistory.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/stackUnknownHistory.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/stackUnknownHistory.cpp",
+  "output": "events/CMakeFiles/events.dir/src/stackUnknownHistory.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/typedef.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/typedef.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/typedef.cpp",
+  "output": "events/CMakeFiles/events.dir/src/typedef.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/util.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/util.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/util.cpp",
+  "output": "events/CMakeFiles/events.dir/src/util.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/events",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/events.dir/src/value.cpp.o -c /mnt/d/Projects/LiMo/tool/events/src/value.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/events/src/value.cpp",
+  "output": "events/CMakeFiles/events.dir/src/value.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/coverlin.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/coverlin.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/coverlin.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/coverlin.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/covermonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/covermonitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/covermonitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/covermonitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/durablestack.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/durablestack.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/durablestack.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/durablestack.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/graph.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/graph.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/graph.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/graph.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/graphmonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/graphmonitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/graphmonitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/graphmonitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/interval_tree.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/interval_tree.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/interval_tree.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/interval_tree.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/monitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/monitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/monitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/monitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/naive_durablestack.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/naive_durablestack.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/naive_durablestack.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/naive_durablestack.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/queuemonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/queuemonitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/queuemonitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/queuemonitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/segmentizer.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/segmentizer.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/segmentizer.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/segmentizer.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/stackUnknownMonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/stackUnknownMonitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/stackUnknownMonitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/stackUnknownMonitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/stackoptimalmonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/stackoptimalmonitor.cpp",
+  "file": "/mnt/d/Projects/LiMo/tool/monitor/src/stackoptimalmonitor.cpp",
+  "output": "monitor/CMakeFiles/monitor.dir/src/stackoptimalmonitor.cpp.o"
+},
+{
+  "directory": "/mnt/d/Projects/LiMo/build/Release/monitor",
+  "command": "/usr/bin/g++  -I/mnt/d/Projects/LiMo/tool/include -O3 -DNDEBUG -std=gnu++20 -O0 -g -o CMakeFiles/monitor.dir/src/treemonitor.cpp.o -c /mnt/d/Projects/LiMo/tool/monitor/src/treemonitor.cpp

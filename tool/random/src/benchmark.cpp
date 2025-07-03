@@ -32,6 +32,7 @@ bool verbose = false;
 int reps = 0;
 int increment = 0;
 int n_configs = 0;
+ADT adt;
 
 
 #if DEBUGGING
@@ -47,6 +48,7 @@ bool get_options(int argc, char *argv[]) {
       ("verbose,v", value(&verbose)->default_value(false)->implicit_value(true), "Verbose")
       ("increment,i", value(&increment)->default_value(0)->implicit_value(1))
       ("algorithm,a", value(&algorithm)->default_value(Algorithm::interval), "Algorithm (only for benchmark)")
+      ("adt,d", value(&adt)->default_value(ADT::stack), "ADT to check")
       ("repetitions,r", value(&reps)->default_value(1)->implicit_value(10), "Number of repetitions")
       ("suite", value(&suite)->required())
       ("output", value(&filename)->required(), "Output file");
@@ -96,7 +98,12 @@ int main(int argc, char *argv[]) {
     MPI_Bcast(&algorithm, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if(rank == 0 && verbose)
         std::cout << "Broadcasted algorithm" << std::endl;
+    MPI_Bcast(&adt, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if(rank == 0 && verbose)
+        std::cout << "Broadcasted ADT" << std::endl;
     MPI_Bcast(&reps, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
     if(rank == 0 && verbose)
         std::cout << "Broadcasted repetitions" << std::endl;
 
@@ -126,10 +133,22 @@ int main(int argc, char *argv[]) {
     int total_size = confs.rbegin()->values;
     std::random_device dev;
     std::mt19937_64 rand(dev());
-    int *indices = new int[total_size * 4];
+    // int *indices = new int[total_size * 4];
     double *benchmark_results = new double[n_configs * num_iters_per];
 
     ExhaustiveGenerator exGen;
+    ExhaustiveGenerator::HistoryType type = ExhaustiveGenerator::NORMAL;
+    switch (adt)
+    {
+    case unknown_after:
+        type = ExhaustiveGenerator::UNKNOWN_AFTER;
+        break;
+    
+    default:
+        break;
+    }
+
+    exGen.setHistoryType(type);
 
 
     std::random_device rd;
@@ -148,9 +167,12 @@ int main(int argc, char *argv[]) {
 
             #if KEEP_ONLY_LIN
 
+            //include this in suite/configuration
+            exGen.setNumCrashes(cfg.values/2);
+
             std::vector<int> history = exGen.create_single(cfg.values, cfg.threads, rng);
 
-            conf = hist_from_ints(history);
+            conf = hist_from_ints(cfg.values, history, type);
 
             MonitorConfig mc;
 
@@ -190,7 +212,7 @@ int main(int argc, char *argv[]) {
         }
 
     }
-    delete[] indices;
+    // delete[] indices;
 
 
     std::map<config, std::vector<double>> main_results;

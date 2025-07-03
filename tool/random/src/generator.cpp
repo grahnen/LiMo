@@ -4,6 +4,15 @@
 #include "io.h"
 #include "convert.h"
 
+// int ExhaustiveGenerator::genHistoryType = NORMAL;
+// int EXhaustiveGenerator::crashes        = 0;
+
+//ExhaustiveGenerator class functions
+
+
+
+//Other Functions
+
 int thread_count(std::vector<event_t> &hist) {
     auto max_t_it = std::max_element(hist.begin(), hist.end(), [](event_t a, event_t b) {
         return a.thread < b.thread;

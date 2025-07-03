@@ -12,7 +12,7 @@ tid_t THREAD_COUNT;
 
 StackUnknownMonitor::StackUnknownMonitor(MonitorConfig config) : Monitor(config)
 {
-	std::cout << "stack monitor created\n"; 
+	// std::cout << "stack monitor created\n"; 
 	if (!config.type & stack)
 	{
 		throw std::logic_error("Unhandled ADT: " + ext2str(config.type));
@@ -192,7 +192,7 @@ void StackUnknownMonitor::do_linearization()
 	if(verbose)
 		print_state();
 
-	throw Exception("unimplemented");
+	throw Crash("unimplemented");
 
 	#ifdef IMPL_STACK_UNKNOWN
 

@@ -23,34 +23,192 @@ public:
 		UNKNOWN_AFTER,
 	};
 
-	ExhaustiveGenerator() : genHistoryType(NORMAL), crashes(0)
+	ExhaustiveGenerator()
 	{}
 
-	ExhaustiveGenerator(HistoryType type, int crashes = 0) : genHistoryType(type), crashes(crashes)
-	{}
+	void setHistoryType(HistoryType type)
+	{
+		genHistoryType = type;
+	}
+
+	HistoryType getHistoryType()
+	{
+		return genHistoryType;
+	}
+
+	void setNumCrashes(size_t c)
+	{
+		crashes = c;
+	}
 
 private:
 	// size is total number of values - always
-	struct durableUnknownState
+	struct DurableUnknownState
 	{
 		// values 0 - size-crashes-1 : 4-0
-		// values size-crashes - size-1 : 4-2
-		// values size : -1 - (-1-crashes)
+		// values size-crashes - size-1 : 2-0
+		// value size : crashed pop 
+		// value -1   : crash
+	private:
 		std::vector<char> state;
+		int numCrashes;
+		int activePop;
+		int sz;
+	public:
 
-		bool check_done()
+		inline bool check_done()
 		{
-			assert(crashes == 0);
-			throw std::logic_error("unimplemented");
-			return true;
-			// return std::all_of(state.begin(), state.begin() + )
+			bool b1 = std::all_of(state.begin(), state.end(), [](char i){return i==0;});
+			bool b2 = (numCrashes == crashes);
+			bool b3 = (activePop == 0);
+			return b1 && b2 && b3;
+		}
+		
+		inline void initialize(int size)
+		{
+			sz = size;
+			// state.resize(size-crashes, 4);
+			// state.resize(size, 2);
+			state.resize(size, 4);
+			for(int i = size-crashes; i < size; i++)
+				state.at(i) = 2;
+			numCrashes = 0;
+			activePop  = 0;
+		}
+
+		inline void update(int x)
+		{
+			if(x == sz)
+			{
+				numCrashes++;
+				activePop++;
+			}
+			else if(x == -1)
+			{
+				activePop = 0;
+			}
+			else if(x >= 0 && x < sz)
+			{
+				state.at(x)--;
+			}
+			else
+			{
+				throw std::logic_error("wrong int");
+			}
+		}
+
+		std::set<int> possible_indices(tid_t max_conc = MAX_THREADS)
+		{
+			if(check_done())
+				return std::set<int>();
+
+			bool all0or2 = true;
+			int earliestCompleted = INT_MAX;
+			int earliestPending = INT_MAX;
+			std::set<int> possible_returns;
+			int idx = 0;
+
+			
+			for(auto it = state.begin(); it != state.end(); it++)
+			{
+				char& i = *it;
+				// std::cout<<idx<<" ";
+				if(i == 4 && earliestCompleted == INT_MAX)
+					earliestCompleted = idx;
+				if(idx >= sz-crashes && i==2 && earliestPending == INT_MAX)
+					earliestPending = idx;
+				if(i==1 || i==3)
+					possible_returns.insert(idx);
+				all0or2 &= ( i==0 || i==2);
+				idx++;
+				
+			}
+
+
+			//check crash compatible
+			if(all0or2
+				&& (activePop > 0))
+			{
+				return std::set<int>({-1});
+			}
+
+			// std::set<int> idxs;
+
+			//fix this 
+			size_t current_concurrency = possible_returns.size() + activePop;
+			
+			std::set<int> pinds = std::move(possible_returns);
+
+			if (current_concurrency < max_conc)
+			{
+				// All possible pop_calls
+				for (size_t i = 0; i < sz - crashes; i++)
+				{
+					if (state.at(i) == 2)
+						pinds.insert(i);
+				}
+				// The first possible push, if there is one
+				if (earliestCompleted < sz - crashes)
+					pinds.insert(earliestCompleted);
+				if(earliestPending < sz)
+					pinds.insert(earliestPending);
+				
+				//crashed pop
+				if(numCrashes < crashes)
+					pinds.insert(sz);
+
+			}
+
+			return pinds;
+
+		}
+
+		ev_t getAndUpdate(int i)
+		{
+			if(i == -1)
+			{
+				activePop = 0;
+				return evt(-1,-1);
+			}
+			else if(i>=0 && i < sz - crashes)
+			{
+				return evt(i, state.at(i)--);
+			}
+			else if(i >= sz - crashes && i < sz)
+			{
+				return evt(i, (state.at(i)--)+2);
+			}
+			else
+			{
+				activePop++;
+				return ev_t(Epop, (sz + numCrashes++));
+			}
+		}
+
+		static event_t getEventFromEv(ev_t ev, timestamp_t ts)
+		{
+			auto &[type, th] = ev;
+			if(type == Ecrash)
+			{
+				return event_t(Ecrash, -1, {}, ts);
+			}
+			else if(type != Epop)
+			{
+				return event_t(type, th, val_t(th, 0), ts);
+			}
+			else
+			{
+				return event_t(Epop, th, {}, ts);
+			}
 		}
 	};
 
-	struct normalState
+	struct NormalState
 	{
+	private:
 		std::vector<char> state;
 
+	public:
 		inline bool check_done()
 		{
 			return std::all_of(state.begin(), state.end(), [](char a)
@@ -65,7 +223,7 @@ private:
 
 		inline void update(int x)
 		{
-			state[x]--;
+			state.at(x)--;
 		}
 
 		std::set<int> possible_indices(tid_t max_conc = MAX_THREADS)
@@ -90,7 +248,7 @@ private:
 			std::set<int> possible_returns;
 			for (int i = 0; i < state.size(); i++)
 			{
-				if (state[i] == 1 || state[i] == 3)
+				if (state.at(i) == 1 || state.at(i) == 3)
 					possible_returns.insert(i);
 			}
 
@@ -101,7 +259,7 @@ private:
 				// All possible pop_calls
 				for (size_t i = 0; i < state.size(); i++)
 				{
-					if (state[i] == 2)
+					if (state.at(i) == 2)
 						pinds.insert(i);
 				}
 				// The first possible push, if there is one
@@ -114,14 +272,21 @@ private:
 	
 		inline ev_t getAndUpdate(int i)
 		{
-			ev_t e = evt(i, state[i]);
+			ev_t e = evt(i, state.at(i));
 			update(i);
 			return e;
 		}
+	
+		static inline event_t getEventFromEv(ev_t ev, timestamp_t ts)
+		{
+			auto &[type, th] = ev;
+			return event_t(type, th, val_t(th, 0), ts);
+		}
 	};
 
-	int genHistoryType;
-	int crashes;
+	static inline HistoryType genHistoryType = NORMAL;
+	static inline int crashes = 0;
+
 
 public:
 	/* Shamelessly stolen from cppreference */
@@ -322,7 +487,7 @@ public:
 		return e;
 	}
 
-	inline std::set<int> possible_indices(std::vector<char> state, tid_t max_conc = MAX_THREADS)
+	std::set<int> possible_indices(std::vector<char> state, tid_t max_conc = MAX_THREADS)
 	{
 		if (std::all_of(state.begin(), state.end(), [](char i)
 						{ return i == 0; }))
@@ -344,7 +509,7 @@ public:
 		std::set<int> possible_returns;
 		for (int i = 0; i < state.size(); i++)
 		{
-			if (state[i] == 1 || state[i] == 3)
+			if (state.at(i) == 1 || state.at(i) == 3)
 				possible_returns.insert(i);
 		}
 
@@ -355,7 +520,7 @@ public:
 			// All possible pop_calls
 			for (size_t i = 0; i < state.size(); i++)
 			{
-				if (state[i] == 2)
+				if (state.at(i) == 2)
 					pinds.insert(i);
 			}
 			// The first possible push, if there is one
@@ -366,7 +531,7 @@ public:
 		return pinds;
 	}
 
-	inline Generator<std::vector<int>> gen_histories(std::vector<char> state, tid_t max_conc = MAX_THREADS, int num_to_fix = -1, std::vector<int> prepend = std::vector<int>())
+	Generator<std::vector<int>> gen_histories(std::vector<char> state, tid_t max_conc = MAX_THREADS, int num_to_fix = -1, std::vector<int> prepend = std::vector<int>())
 	{
 		if (
 			num_to_fix == 0 || // Partial finished
@@ -382,7 +547,7 @@ public:
 		for (int i : indices)
 		{
 			std::vector<char> s2(state.begin(), state.end());
-			s2[i]--;
+			s2.at(i)--;
 			auto gen = gen_histories(s2, max_conc, num_to_fix - 1);
 			while (gen)
 			{
@@ -402,7 +567,7 @@ public:
 		return v[r];
 	}
 
-	inline std::vector<int> gen_single(std::vector<char> state, tid_t max_conc, std::mt19937_64 &rand, std::vector<int> prepend = std::vector<int>())
+	std::vector<int> gen_single(std::vector<char> state, tid_t max_conc, std::mt19937_64 &rand, std::vector<int> prepend = std::vector<int>())
 	{
 		std::set<int> indices = possible_indices(state, max_conc);
 
@@ -481,35 +646,53 @@ public:
 
 
 
-	static inline std::vector<ev_t> make_history(int size, int *events, int type = NORMAL)
+	static std::vector<ev_t> make_history(int size, int *events, int type = NORMAL)
 	{
 		switch(type)
 		{
 			case NORMAL:
-				return make_history<normalState>(size, events);
+				return make_history<NormalState>(size, events);
+			case UNKNOWN_AFTER:
+				return make_history<DurableUnknownState>(size, events);
 			default:
 				throw std::logic_error("Unimplemented");
 		}
 		return make_history(size, events,type);
 	}
 
-	static inline std::vector<ev_t> make_history(int size, std::vector<int> &events, int type = NORMAL)
+	static std::vector<ev_t> make_history(int size, std::vector<int> &events, int type = NORMAL)
 	{
 		switch(type)
 		{
 			case NORMAL:
-				return make_history<normalState>(size, events.data());
+				return make_history<NormalState>(size, events.data());
+			case UNKNOWN_AFTER:
+				return make_history<DurableUnknownState>(size, events.data());
 			default:
 				throw std::logic_error("Unimplemented");
 		}
 		return make_history(size, events.data(),type);
 	}
 
+
+	//extend this function to generate durable histories
 	inline std::vector<int> create_single(int size, tid_t max_threads, std::mt19937_64 &rand)
 	{
-		std::vector<char> initial;
-		initial.resize(size, 4);
-		return gen_single(initial, max_threads, rand);
+		NormalState initNormal;
+		DurableUnknownState initUA;
+		switch (genHistoryType)
+		{
+			case HistoryType::NORMAL:
+				initNormal.initialize(size);
+				return gen_single(initNormal, max_threads, rand);
+			case HistoryType::UNKNOWN_AFTER:
+				initUA.initialize(size);
+				return gen_single(initUA, max_threads, rand);
+			default:
+				throw std::logic_error("unhandled history type");
+		}
+
+		return gen_single(initNormal, max_threads, rand);
 	}
 
 
@@ -518,10 +701,12 @@ public:
 		switch(genHistoryType)
 		{
 			case NORMAL:
-				return create_generator_prepended<normalState>(size, events, num_new, max_threads);
+				return create_generator_prepended<NormalState>(size, events, num_new, max_threads);
+			case UNKNOWN_AFTER:
+				return create_generator_prepended<DurableUnknownState>(size, events, num_new, max_threads);
 			default:
 				throw std::logic_error("Unimplemented");
-				return create_generator_prepended<normalState>(size, events, num_new, max_threads);
+				return create_generator_prepended<NormalState>(size, events, num_new, max_threads);
 
 		}
 	}
@@ -540,11 +725,11 @@ public:
 		return -1;
 	}
 
-	inline std::vector<std::vector<int>> create_inits(int size, int min_amt, tid_t max_threads = MAX_THREADS)
+	std::vector<std::vector<int>> create_inits(int size, int min_amt, tid_t max_threads = MAX_THREADS)
 	{
 		if (genHistoryType == UNKNOWN_AFTER)
 		{
-			return unknown_after_create_inits(size, min_amt, max_threads);
+			return create_inits_durable_unknown(size, min_amt, max_threads);
 		}
 
 		std::vector<std::vector<int>> histories{std::vector<int>{0}};
@@ -556,7 +741,7 @@ public:
 			new_histories.clear();
 			for (auto h : histories)
 			{
-				auto gen = create_generator_prepended<normalState>(size, h, 1, max_threads);
+				auto gen = create_generator_prepended<NormalState>(size, h, 1, max_threads);
 				while (gen)
 					new_histories.push_back(gen());
 			}
@@ -566,29 +751,19 @@ public:
 		return histories;
 	}
 
-	inline std::vector<std::vector<int>> unknown_after_create_inits(int size, int min_amt, tid_t max_threads = MAX_THREADS)
+	static inline event_t getEventFromEv(ev_t ev, timestamp_t ts, HistoryType type=NORMAL)
 	{
-		std::vector<std::vector<int>> histories{std::vector<int>{0}, std::vector<int>{size - crashes}, std::vector<int>{-1}};
-		std::vector<std::vector<int>> new_histories;
-		int remaining = (size - crashes) * 4 + crashes * 3 - 1;
-		while ((histories.size() < min_amt) && remaining != 0)
+		switch(type)
 		{
-			remaining--;
-			new_histories.clear();
-			for (auto h : histories)
-			{
-				assert(false);
-				auto gen = create_generator_prepended(size, h, 1, max_threads);
-				while (gen)
-					new_histories.push_back(gen());
-			}
-			histories.clear();
-			histories = new_histories;
+			case NORMAL:
+				return NormalState::getEventFromEv(ev, ts);
+			case UNKNOWN_AFTER:
+				return DurableUnknownState::getEventFromEv(ev, ts);
+			default:
+				throw std::logic_error("unknown type");
 		}
-		return histories;
+
 	}
-
-
 
 private:
 	//These will mostly be templated functions. All calls to these must go through public functions, which call them with the correct type
@@ -634,7 +809,7 @@ private:
 		for (int i : indices)
 		{
 			// std::vector<char> s2(state.begin(), state.end());
-			normalState s2(state);
+			StateType s2(state);
 			// s2[i]--;
 			s2.update(i);
 			auto gen = gen_histories(s2, max_conc, num_to_fix - 1);
@@ -646,23 +821,70 @@ private:
 		co_return;
 	}
 
-	template<typename T>
+	template<typename StateType>
 	inline Generator<std::vector<int>> create_generator_prepended(int size, std::vector<int> &events, int num_new = INT_MAX, tid_t max_threads = MAX_THREADS)
 	{
 		std::vector<int> prepend;
 		// std::vector<char> initial;
-		T initial;
+		StateType initial;
 		initial.initialize(size);
 		// initial.resize(size, 4);
 		for (auto v : events)
 		{
-			assert(v < initial.size());
+			// assert(v < initial.size());
 			prepend.push_back(v);
 			// initial[v]--;
 			initial.update(v);
 		}
 		return gen_histories(initial, max_threads, num_new, prepend);
 	}
+	
+	inline std::vector<std::vector<int>> create_inits_durable_unknown(int size, int min_amt, tid_t max_threads)
+	{
+		std::vector<std::vector<int>> histories;
+		if(size -crashes > 0)
+			histories.emplace_back(1,0);
+		if(crashes > 0)
+		{
+			histories.emplace_back(1,size - crashes);
+			histories.emplace_back(1,size);
+		}
+		std::vector<std::vector<int>> new_histories;
+		int remaining = size * 4 - 1;
+		while ((histories.size() < min_amt) && remaining != 0)
+		{
+			remaining--;
+			new_histories.clear();
+			for (auto h : histories)
+			{
+				// assert(false);
+				auto gen = create_generator_prepended<DurableUnknownState>(size, h, 1, max_threads);
+				while (gen)
+					new_histories.push_back(gen());
+			}
+			histories.clear();
+			histories = new_histories;
+		}
+		return histories;
+	}
+
+	template<typename StateType>
+	std::vector<int> gen_single(StateType state, tid_t max_conc, std::mt19937_64 &rand, std::vector<int> prepend = std::vector<int>())
+	{
+		std::set<int> indices = state.possible_indices(max_conc);
+
+		while (!indices.empty())
+		{
+			int selected = select_random(indices, rand);
+
+			state.update(selected);
+			prepend.push_back(selected);
+			indices = state.possible_indices(max_conc);
+		}
+		return prepend;
+	}
 };
+
+
 
 #endif // GENERATOR_H_

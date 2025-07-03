@@ -20,6 +20,7 @@ ADT adt;
 int n_elements;
 tid_t max_threads;
 int num_histories;
+int n_crashes;
 
 bool get_options(int argc, char *argv[]) {
   try {
@@ -28,9 +29,10 @@ bool get_options(int argc, char *argv[]) {
       ("help,h", "Help")
       ("verbose,v", value(&verbose)->default_value(false)->implicit_value(true), "Verbose")
       ("algorithm,a", value(&alg)->default_value(DefaultAlgorithm), "Algorithm")
-      ("compare,c", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
+      ("compare,b", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
       ("threads,t", value(&max_threads)->default_value(MAX_THREADS))
       ("adt,d", value(&adt)->default_value(ADT::stack), "ADT to check")
+      ("max_crashes,c", value(&n_crashes)->default_value(0), "Maximum number of crashes in history")
       ("size", value(&n_elements)->required(), "Number of values")
       ("num_tests", value(&num_histories)->required(), "Number of tests");
 
@@ -69,6 +71,8 @@ int main(int argc, char *argv[]) {
   MPI_Bcast(&adt, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&cmp, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&max_threads, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&n_crashes, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
   //Randomize histories
   int num_self = num_histories / size + (rank < num_histories % size ? 1 : 0);
 
@@ -87,9 +91,23 @@ int main(int argc, char *argv[]) {
 
   ExhaustiveGenerator exGen;
 
+  ExhaustiveGenerator::HistoryType type = ExhaustiveGenerator::NORMAL;
+  switch (adt)
+  {
+  case unknown_after:
+      type = ExhaustiveGenerator::UNKNOWN_AFTER;
+      break;
+  
+  default:
+      break;
+  }
+
+  exGen.setHistoryType(type);
+  exGen.setNumCrashes(n_crashes);
+
   for(int i = 0; i < num_self; i++) {
     std::vector<int> history = exGen.create_single(n_elements, max_threads, rng);
-    Configuration *conf = hist_from_ints(history);
+    Configuration *conf = hist_from_ints(n_elements, history, type);
     conf->type = adt;
     my_max_conc = std::max(my_max_conc, conf->num_threads);
     mc.thread_count = conf->num_threads;
@@ -157,12 +175,12 @@ int main(int argc, char *argv[]) {
     int num_crashes = crsize / ( 4 * n_elements);
 
     for(int i = 0; i < num_mismatches; i++) {
-      Configuration *conf = hist_from_ints(n_elements, &mismatches[i * 4 * n_elements]);
+      Configuration *conf = hist_from_ints(n_elements, &mismatches[i * 4 * n_elements], type);
       write_file(&conf->history, "atomic-stack", "mismatches/" + std::to_string(i) + ".hist");
     }
 
     for(int i = 0; i < num_crashes; i++) {
-      Configuration *conf = hist_from_ints(n_elements, &crashes[i * 4 * n_elements]);
+      Configuration *conf = hist_from_ints(n_elements, &crashes[i * 4 * n_elements], type);
       write_file(&conf->history, "atomic-stack", "crashes/" + std::to_string(i) + ".hist");
     }
 

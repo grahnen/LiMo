@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/mnt/d/Projects/LiMo/tool/include -I/mnt/d/Projects/LiMo/tool/impl/include -I/mnt/d/Projects/LiMo/tool/impl/../run/src -I/mnt/d/Projects/LiMo/tool/impl/../oolin/src
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++20 -O2 -g -O3 -march=x86-64 -mtune=generic
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++20 -O3 -g -march=x86-64 -mtune=generic
 

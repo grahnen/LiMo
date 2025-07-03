@@ -34,6 +34,7 @@ index_t n_elements;
 int num_fixed;
 int num_sent;
 tid_t max_thr;
+ADT adt;
 int max_crashes;
 
 
@@ -67,7 +68,8 @@ bool get_options(int argc, char *argv[]) {
       ("algorithm,a", value(&alg)->default_value(Algorithm::segment), "Algorithm")
       ("compare,b", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
       ("max_thr,t", value(&max_thr)->default_value(MAX_THREADS), "Maximum thread count")
-      ("size", value(&n_elements)->required(), "Number of values")
+      ("size", value(&n_elements)->default_value(ADT::stack), "Number of values")
+      ("adt,d", value(&adt)->required(), "ADT to check")
       ("max_crashes,c", value(&max_crashes)->default_value(0), "Maximum number of crashes in history");
     positional_options_description pos;
     pos.add("size", 1);
@@ -99,7 +101,7 @@ int main(int argc, char *argv[]) {
   int *data = 0;
   int *displs = 0;
 
-  ExhaustiveGenerator exGen;
+  
   std::vector<std::vector<int>> gens;
 
   if(rank == 0) {
@@ -107,6 +109,28 @@ int main(int argc, char *argv[]) {
     if(!get_options(argc, argv)) {
       throw std::logic_error("Invalid arguments");
     }
+  }
+
+  MPI_Bcast(&max_crashes, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&adt, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  ExhaustiveGenerator exGen;
+  ExhaustiveGenerator::HistoryType type = ExhaustiveGenerator::NORMAL;
+  switch (adt)
+  {
+  case ADT::unknown_after:
+      // std::cout<<"Here\n";
+      type = ExhaustiveGenerator::UNKNOWN_AFTER;
+      break;
+  
+  default:
+      // std::cout << "no!!!" << adt <<"-"<< int(ADT::unknown_after) <<"\n";
+      break;
+  }
+
+  exGen.setHistoryType(type);
+  exGen.setNumCrashes(max_crashes);
+
+  if(rank == 0){
 
     std::cout << "Exhaustively testing histories with " << n_elements << " elements";
     if(max_thr < MAX_THREADS) {
@@ -117,11 +141,20 @@ int main(int argc, char *argv[]) {
     std::cout << "Comparison algorithm:\t" << cmp << std::endl;
     // Root process should be communication hub instead of a worker.
     // Make more than needed to lessen the impact of different inits generating different history counts
+
     gens = exGen.create_inits(n_elements, (size - 1) * (size - 1) * 2, max_thr);
 
     num_each = gens[0].size();
     n_inits = gens.size();
     std::cout << (size - 1) << " processes gives " << n_inits << " inits" << std::endl;
+
+    if(verbose)
+    {
+      std::cout << "ADT: " << adt << std::endl
+                << "History Type: " << type << std::endl;
+    }
+
+    /*
     // if(n_inits < (size -1))
     //   throw std::logic_error("Cannot have more processes than possible histories");
 
@@ -148,13 +181,13 @@ int main(int argc, char *argv[]) {
     // for(int i = 0; i < size; i++) {
     //   displs[i] = curr_displ;
     //   curr_displ += counts[i];
-    // }
+    // }*/
   }
 
   MPI_Bcast(&alg, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   MPI_Bcast(&cmp, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
+  
   MPI_Bcast(&max_thr, 1, MPI_THR, 0, MPI_COMM_WORLD);
 
   MPI_Bcast(&n_elements, 1, MPI_IDX, 0, MPI_COMM_WORLD);
@@ -162,9 +195,16 @@ int main(int argc, char *argv[]) {
 //  MPI_Bcast(&n_inits, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   MPI_Bcast(&num_each, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&max_crashes, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
 
   int *init = rank == 0 ? nullptr : new int[num_each];
+
+  if(verbose)
+  {
+    std::cout<<"History Type - " << type << std::endl;
+    std::cout << "Set History Type - " << exGen.getHistoryType() << std::endl;
+  }
+ 
 
   MPI_Request request;
 
@@ -222,25 +262,22 @@ int main(int argc, char *argv[]) {
         }
         if(tag == MESSAGE_MISMATCH) {
           std::cout << "Mismatch found!" << std::endl;
-          int mismatch[n_elements * 4];
-          MPI_Recv(&mismatch, n_elements * 4, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
-          std::vector<int> mm;
-          mm.resize(n_elements * 4);
-          for(int i = 0; i < mm.size(); i++) {
-            mm[i] = mismatch[i];
-          }
-          Configuration *mis = hist_from_ints(mm);
+          int hist_size;
+          MPI_Recv(&hist_size, 1, MPI_LONG_LONG, from, tag, MPI_COMM_WORLD, &status);
+          vector<int> history(hist_size);
+          MPI_Recv(&history[0],hist_size, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
+          Configuration *mis = hist_from_ints(n_elements, history, type);
 
           write_file(&mis->history, "atomic-stack", "mismatches/" + std::to_string(mismatches) + ".hist");
           mismatches++;
           delete mis;
         } else if (tag == MESSAGE_CRASH) {
           std::cout << "Crash found!" << std::endl;
-          std::vector<int> crash;
-          crash.resize(n_elements * 4);
-          MPI_Recv(&crash[0], n_elements * 4, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
-
-          Configuration *mis = hist_from_ints(crash);
+          int hist_size;
+          MPI_Recv(&hist_size, 1, MPI_LONG_LONG, from, tag, MPI_COMM_WORLD, &status);
+          std::vector<int> crash(hist_size);
+          MPI_Recv(&crash[0],hist_size, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
+          Configuration *mis = hist_from_ints(n_elements, crash, type);
           write_file(&mis->history, "atomic-stack", "crashes/" + std::to_string(crashes) + ".hist");
           crashes++;
         }
@@ -275,7 +312,7 @@ int main(int argc, char *argv[]) {
         while(generator) {
           std::vector<int> int_h = generator();
 
-          Configuration *simpl = hist_from_ints(int_h);
+          Configuration *simpl = hist_from_ints(n_elements, int_h, type);
           MonitorConfig mc;
           mc.thread_count = simpl->num_threads;
           mc.type = simpl->type;
@@ -287,9 +324,13 @@ int main(int argc, char *argv[]) {
 
           if(res == Mismatch) {
             // Mismatch found, send to root!
+            size_t hist_size = int_h.size();
+            MPI_Send(&hist_size, 1, MPI_LONG_LONG, 0, MESSAGE_MISMATCH, MPI_COMM_WORLD );
             MPI_Send(int_h.data(), int_h.size(), MPI_INT, 0, MESSAGE_MISMATCH, MPI_COMM_WORLD);
           }
           if(res == MonitorCrash) {
+            size_t hist_size = int_h.size();
+            MPI_Send(&hist_size, 1, MPI_LONG_LONG, 0, MESSAGE_CRASH, MPI_COMM_WORLD );
             MPI_Send(int_h.data(), int_h.size(), MPI_INT, 0, MESSAGE_CRASH, MPI_COMM_WORLD);
           }
 

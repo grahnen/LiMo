@@ -33,6 +33,9 @@ inline std::string event_str(EType &etp, std::optional<std::string> valstr) {
       return etype_name[etp] + " " + valstr.value();
     return etype_name[etp];
   }
+  else if(etp == Ecrash){
+    return etype_name[etp];
+  }
 
   if(valstr.has_value())
     return etype_name[etp] + "(" + valstr.value() + ")";

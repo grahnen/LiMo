@@ -85,7 +85,8 @@ stack = 1 << 1,
 queue = 1 << 2,
 set = 1 << 3,
 durable_stack = 1 << 4,
-durable_queue = 1 << 5
+durable_queue = 1 << 5,
+unknown_after = 1 << 6,
 };
 
 inline constexpr ADT operator|(const ADT &a, const ADT &b) {
@@ -116,6 +117,8 @@ inline std::istream& operator>>(std::istream& in, ADT &adt) {
     adt = durable_stack;
   if(token == "durable_queue")
     adt = durable_queue;
+  if(token == "unknown_after")
+    adt = unknown_after;
   else
     in.setstate(std::ios_base::failbit);
 
@@ -149,14 +152,21 @@ inline constexpr std::ostream &operator<<(std::ostream &os, const ADT &a) {
   }
   if(c & durable_stack) {
     os << "durable stack";
-    c ^= set;
+    c ^= durable_stack;
     if(c > 0) {
       os << " | ";
     }
   }
   if(c & durable_queue) {
     os << "durable queue";
-    c ^= set;
+    c ^= durable_queue;
+    if(c > 0) {
+      os << " | ";
+    }
+  }
+  if(c & unknown_after) {
+    os << "unknown after";
+    c ^= unknown_after;
     if(c > 0) {
       os << " | ";
     }

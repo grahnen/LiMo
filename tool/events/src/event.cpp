@@ -2,6 +2,11 @@
 #include <ostream>
 
 std::ostream &operator<<(std::ostream &os, const event_t &ev) {
+  if(ev.type == Ecrash)
+  {
+    os << "crash";
+    return os;
+  }
   os << "[" << ev.thread << "] " << etype_name[ev.type];
   if (ev.val.has_value()) {
     if(ev.type == Ereturn)
