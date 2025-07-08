@@ -98,6 +98,16 @@ void StackOptimalMonitor::do_linearization()
 		}
 		compute_k(iTree.root);
 
+		for(const auto& emptyItv : history.empties)
+		{
+			if(segTree.query(emptyItv)!=0)
+			{
+				if(iTree.root != nullptr)
+					iTree.deleteTree(iTree.root);
+				throw Violation("Completed History not lin: empty violation");
+			}
+		}
+
 		// Initialize Sets
 		for (auto &[v, cv] : values)
 		{

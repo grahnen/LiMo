@@ -639,7 +639,7 @@ public:
 
         if (z == nullptr)
         {
-            throw Exception("key not found");
+            // throw Exception("key not found");
             // cout << "Key not found in the tree" << endl;
             return;
         }

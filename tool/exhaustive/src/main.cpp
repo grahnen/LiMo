@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
           MPI_Recv(&history[0],hist_size, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
           Configuration *mis = hist_from_ints(n_elements, history, type);
 
-          write_file(&mis->history, "atomic-stack", "mismatches/" + std::to_string(mismatches) + ".hist");
+          write_file(&mis->history, ext2str(adt), "mismatches/" + std::to_string(mismatches) + ".hist");
           mismatches++;
           delete mis;
         } else if (tag == MESSAGE_CRASH) {
@@ -277,8 +277,8 @@ int main(int argc, char *argv[]) {
           MPI_Recv(&hist_size, 1, MPI_LONG_LONG, from, tag, MPI_COMM_WORLD, &status);
           std::vector<int> crash(hist_size);
           MPI_Recv(&crash[0],hist_size, MPI_INT, from, tag, MPI_COMM_WORLD, &status);
-          Configuration *mis = hist_from_ints(n_elements, crash, type);
-          write_file(&mis->history, "atomic-stack", "crashes/" + std::to_string(crashes) + ".hist");
+        Configuration *mis = hist_from_ints(n_elements, crash, type);
+          write_file(&mis->history, ext2str(adt), "crashes/" + std::to_string(crashes) + ".hist");
           crashes++;
         }
       }

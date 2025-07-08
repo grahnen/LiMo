@@ -171,10 +171,19 @@ public:
 		return getMinInterval(itv.lbound, itv.ubound, minVal);
 	}
 
+	long long int elementRight(timestamp_t ts)
+	{
+
+		size_t idx, idx2;
+		indexFromTs(ts, timestamps.back(), idx, idx2);
+		return queryRec(idx, idx+1, 1, levels);
+	}
+
 private:
 	// returns range [idx1, idx2] for ts [ts1,ts2]
 	void indexFromTs(timestamp_t ts1, timestamp_t ts2, size_t &idx1, size_t &idx2)
 	{
+		// cout<<"indexFromTs " << ts1 <<" " << ts2 <<"\n";
 		if (!timestampsInv.contains(ts1))
 			throw Exception("timestamp index out of range: " + std::to_string(ts1));
 		idx1 = timestampsInv.at(ts1);

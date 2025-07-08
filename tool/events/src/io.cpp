@@ -96,6 +96,10 @@ ADT parse_type(std::string type) {
   else if(type.compare("queue") == 0 || type.compare("atomic-queue") == 0) {
     return queue;
   }
+  else if(type.compare("unknown-after") == 0)
+  {
+    return unknown_after;
+  }
 
   else {
     throw std::logic_error("Unknown ADT: " + type);
@@ -118,16 +122,21 @@ Configuration *read_log(std::string filename) {
   char line[100];
   std::cmatch cm;
 
+  // std::cout << "Reading Log " << std::endl;
+
   //Get data type
   while (file.getline(line, 100)) {
+    // std::cout<<"Read line: " << line << "\n";
     if (std::regex_match(line, cm, type_regex)) {
+      // std::cout<<"Read type: " << cm[1].str() << "\n";
       c->type = parse_type(cm[1].str());
       break;
     }
   }
   //Get history
-  //std::cout << "Reading <" << cm[1] << "> history" << std::endl;
+  // std::cout << "Reading <" << cm[1] << "> history" << std::endl;
   while (file.getline(line, 100)) {
+    // std::cout<<"Read line: " << line << "\n";
     std::optional<event_t> e = get_event(line, counts, value_map, varmap, &c->needs_simpl);
     if(e.has_value()) {
       if((e->thread  + 1) > c->num_threads)
@@ -136,6 +145,10 @@ Configuration *read_log(std::string filename) {
     }
   }
   file.close();
+
+  if(c->type & (durable_queue | durable_stack | unknown_after))
+    c->needs_simpl = false;
+
   return c;
 }
 
@@ -174,12 +187,16 @@ std::string violin_compatible(event_t &ev) {
     s = vs.str();
   }
 
-  ss << "[" << ev.thread << "] " << event_str(ev.type, s);
+  if(ev.type != Ecrash)
+    ss << "[" << ev.thread << "] " ;
+  ss << event_str(ev.type, s);
 
   return ss.str();
 }
 
 void write_file(Sequence *h, std::string adt, std::string filename) {
+  // std::cout << "Write File Called\n";
+  
   std::fstream f;
   f.open(filename, std::ios::out);
   f << "# @object " << adt << std::endl;

@@ -14,7 +14,7 @@ void Monitor::add_event(event_t &e) {
   }
   if (e.type == Ereturn) {
     if(!lastEvt.contains(e.thread) || lastEvt[e.thread] == Ereturn)
-      throw Exception("Return before Call, error in history");
+      throw Exception("Return before Call, error in history: thread " + ext2str(e.thread));
 
     BOOST_PP_SEQ_FOR_EACH(BRANCH_RET,lastEvt[e.thread],OP_TYPE_SEQ);
 
@@ -27,9 +27,10 @@ void Monitor::add_event(event_t &e) {
       lastEvt.clear();
 
     if(lastEvt.contains(e.thread) && lastEvt[e.thread] != Ereturn)
-      throw Exception("Multiple calls before return, error in history");
+      throw Exception("Multiple calls before return, error in history: thread " + ext2str(e.thread));
 
-    lastEvt[e.thread] = e.type;
+    if(e.type != Ecrash)
+      lastEvt[e.thread] = e.type;
 
     BOOST_PP_SEQ_FOR_EACH(BRANCH,e.type,OP_TYPE_SEQ)
     {

@@ -21,6 +21,7 @@ void StackUnknownHistoryAfter::add_pop_call(event_t& call)
 using LinRes = History<StackUnknownHistoryAfter>::LinRes;
 LinRes StackUnknownHistoryAfter::add_ret(event_t& ret, bool crash = false)
 {
+	// std::cout << "add_ret called - ";
 	if(!activeOperations.contains(ret.thread))
 	{
 		throw Violation("return before call " + ext2str(ret));
@@ -31,24 +32,27 @@ LinRes StackUnknownHistoryAfter::add_ret(event_t& ret, bool crash = false)
 	if(call.type == Epush)
 	{
 		pendingPush[call.val.value()] = AtomicInterval(false, call.timestamp, ret.timestamp, false);
+		// std::cout << "push-ret-" << pendingPush[call.val.value()] << std::endl;
 	}
 	else if(call.type == Epop)
 	{
 		if(!ret.val)
 		{
-			//throw Exception("unhandles - empty pop");
+			// std::cout << "empty-pop\n";
+			//throw Exception("unhandled - empty pop");
 			AtomicInterval popInt(false, call.timestamp, ret.timestamp, false);
 			emptyPop.insert(popInt);
 			return LinRes();
 		}
-		if(pendingPush.find(ret.val.value()) == pendingPush.end())
+		if(!pendingPush.contains(ret.val.value()))
 		{
-			if(crashedPush.find(ret.val.value()) == crashedPush.end())
+			if(!crashedPush.contains(ret.val.value()))
 			{
 				throw Violation("pop without push" + ext2str(ret));
 			}
 			else
 			{
+				// std::cout << "crashed push-pop\n";
 				crashedPush.erase(ret.val.value());
 				return LinRes();
 			}
@@ -56,7 +60,8 @@ LinRes StackUnknownHistoryAfter::add_ret(event_t& ret, bool crash = false)
 		AtomicInterval popInt(false, call.timestamp, ret.timestamp, false);
 		AtomicInterval pushInt = std::move(pendingPush[ret.val.value()]);
 		pendingPush.erase(ret.val.value());
-		completedValues[ret.val.value()] = {ret.val.value(), pushInt, popInt};
+		completedValues.emplace(ret.val.value(), CoverVal(ret.val.value(), pushInt, popInt));
+		// std::cout << "Comleted Value: " << ret.val.value() << ", " << pushInt << popInt << std::endl; 
 	}
 
 	return LinRes();
@@ -82,6 +87,25 @@ void StackUnknownHistoryAfter::add_crash(event_t& crash)
 bool StackUnknownHistoryAfter::complete() const
 {
 	return activeOperations.size() == 0;
+}
+
+void StackUnknownHistoryAfter::simplify()
+{
+	if(!complete())
+	{
+		throw Exception("siomplifying incomplete history");
+	}
+
+	for(auto &[v, cv] : completedValues)
+	{
+		if(cv.add.lbound > cv.rmv.ubound)
+			throw Violation("pop before push");
+
+		if(cv.add.ubound > cv.rmv.lbound)
+			completedValues.erase(v);
+	}	
+
+
 }
 
 StackUnknownHistoryAfter::LinRes StackUnknownHistoryAfter::step() 

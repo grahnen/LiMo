@@ -21,11 +21,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
 # add_compile_options(-fsanitize=address -g)
 # add_link_options(-fsanitize=address -g)
 
-add_compile_options(-O3 -g)
-add_link_options(-O3 -g)
+add_compile_options(-O0 -g)
+add_link_options(-O0 -g)
 
-add_compile_options(-O3 -march=x86-64 -mtune=generic)
-add_link_options(-O3 -march=x86-64 -mtune=generic)
+# add_compile_options(fram-O3 -march=x86-64 -mtune=generic)
+# add_link_options(-O3fram -march=x86-64 -mtune=generic)
 
 include_directories(include)
 

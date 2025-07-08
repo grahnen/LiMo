@@ -3,19 +3,13 @@
 
 #include "history.h"
 #include "interval.h"
-
-struct DCoverVal{
-	val_t val;
-	AtomicInterval add;
-	AtomicInterval rmv;
-};
-
+#include "coverhistory.h"
 class StackUnknownHistoryAfter : public History<StackUnknownHistoryAfter>
 {
 public:
 	using LinRes = History<StackUnknownHistoryAfter>::LinRes;
 
-	std::map<val_t, DCoverVal> completedValues;
+	std::map<val_t, CoverVal> completedValues;
 	
 	std::map<val_t, AtomicInterval> pendingPush;
 	std::map<val_t, event_t> crashedPush;
@@ -29,6 +23,8 @@ public:
 	void add_pop_call(event_t& call);
 	void add_crash(event_t& crash);
 	LinRes add_ret(event_t& ret, bool crash);
+
+	void simplify();
 
 	LinRes step();
 	bool complete() const;

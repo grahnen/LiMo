@@ -20,6 +20,7 @@ enum Algorithm : int
   dstack,
   naive_dstack,
   dstack_unknown_after,
+  naive_dstack_unknown_after,
   stack_optimal,
 };
 
@@ -66,6 +67,8 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc)
     return (Monitor *)new NaiveDurableStackMonitor(mc);
   if (alg == dstack_unknown_after)
     return (Monitor *)new StackUnknownMonitor(mc);
+  if (alg == naive_dstack_unknown_after)
+    return (Monitor *)new NaiveDStackUnknown(mc);
   throw std::logic_error("Unknown algorithm! agl=" + ext2str(alg) + ", ADT=" + ext2str(mc.type));
   return nullptr;
 }
@@ -88,6 +91,8 @@ std::istream &operator>>(std::istream &in, Algorithm &alg)
     alg = naive_dstack;
   else if (token == "dstack_unknown_after")
     alg = dstack_unknown_after;
+  else if (token == "naive_dstack_unknown_after")
+    alg = naive_dstack_unknown_after;
   else if (token == "stack")
     alg = stack_optimal;
   else
