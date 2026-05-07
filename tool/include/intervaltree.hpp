@@ -1,5 +1,6 @@
-#include "interval.h"
 #ifndef __INTERVAL_TREE_H
+#define __INTERVAL_TREE_H
+#include "interval.h"
 #include "typedef.h"
 #include "exception.h"
 using namespace std;
@@ -423,6 +424,8 @@ inline bool contains(ItvTree::Node *t, AtomicInterval i)
     if (t->left != nullptr && ii <= L && R <= t->left->data.k)
         return true;
     if (t->left != nullptr && ii <= L && R > t->left->data.k)
+        return contains(t->right, i);
+    if (t->left == nullptr)
         return contains(t->right, i);
     if (L <= ii)
         return contains(t->left, i);

@@ -5,24 +5,35 @@
 #include "stackUnknownHistory.hpp"
 #include "monitor.hpp"
 #include "typedef.h"
+#include "segment_tree.hpp"
 
 class StackUnknownMonitor : public Monitor
 {
 protected:
-	StackUnknownHistoryAfter history;
-	
+	StackUnknownHistory history;
+
 	DECLHANDLER(push)
 	DECLHANDLER(pop)
 	void handle_crash(event_t &);
 
-	timestamp_t findLastValid(const std::map<val_t, CoverVal>& completedValues, 
-						const std::set<AtomicInterval>& empties,
-						const AtomicInterval& push, 
-						std::set<timestamp_t, std::greater<timestamp_t>>& crashedPops, 
-					    timestamp_t& max_ts);
+	timestamp_t findLastValid(const std::map<val_t, CoverVal> &completedValues,
+							  const std::set<AtomicInterval> &empties,
+							  const AtomicInterval &push,
+							  std::set<timestamp_t, std::greater<timestamp_t>> &crashedPops,
+							  timestamp_t &max_ts);
 
+	timestamp_t findFirstValid(const std::map<val_t, CoverVal> &completedValues,
+							   const std::set<AtomicInterval> &empties,
+							   const AtomicInterval &push,
+							   std::set<timestamp_t> &crashedPops,
+							   timestamp_t &max_ts,
+							   std::set<timestamp_t>::iterator begin);
 
-	void CheckStackLin(const CoverHistory& history);
+	void CheckStackLin(const CoverHistory &history);
+
+	tsSegmentTree computeCounters();
+
+	// tsSegmentTree counters;
 
 public:
 	void do_linearization();
@@ -32,9 +43,8 @@ public:
 	{
 		// history.print_state();
 	}
-	
-	bool ADT_supported(ADT adt) {return adt == ADT::stack; } 
 
+	bool ADT_supported(ADT adt) { return adt == ADT::stack; }
 };
 
-#endif //STACK_UNKNOWN_MONITOR_H
+#endif // STACK_UNKNOWN_MONITOR_H

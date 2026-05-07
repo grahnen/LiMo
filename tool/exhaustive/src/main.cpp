@@ -68,7 +68,7 @@ bool get_options(int argc, char *argv[]) {
       ("algorithm,a", value(&alg)->default_value(Algorithm::segment), "Algorithm")
       ("compare,b", value(&cmp)->default_value(Algorithm::cover), "Comparison Algorithm")
       ("max_thr,t", value(&max_thr)->default_value(MAX_THREADS), "Maximum thread count")
-      ("size", value(&n_elements)->default_value(ADT::stack), "Number of values")
+      ("size", value(&n_elements)->default_value(2), "Number of values")
       ("adt,d", value(&adt)->required(), "ADT to check")
       ("max_crashes,c", value(&max_crashes)->default_value(0), "Maximum number of crashes in history");
     positional_options_description pos;
@@ -118,7 +118,6 @@ int main(int argc, char *argv[]) {
   switch (adt)
   {
   case ADT::unknown_after:
-      // std::cout<<"Here\n";
       type = ExhaustiveGenerator::UNKNOWN_AFTER;
       break;
   
@@ -307,7 +306,7 @@ int main(int argc, char *argv[]) {
         int num_crashes = std::count_if(init_v.begin(), init_v.end(), [](int i) {
           return i == -1;
         });
-        std::cout << "Generating with " << (max_crashes - num_crashes) << " crashes" << std::endl;
+        // std::cout << "Generating with " << (max_crashes - num_crashes) << " crashes" << std::endl;
         auto generator = exGen.create_generator_prepended(n_elements, init_v, INT_MAX, max_thr);
         while(generator) {
           std::vector<int> int_h = generator();
@@ -315,7 +314,8 @@ int main(int argc, char *argv[]) {
           Configuration *simpl = hist_from_ints(n_elements, int_h, type);
           MonitorConfig mc;
           mc.thread_count = simpl->num_threads;
-          mc.type = simpl->type;
+          // mc.type = simpl->type;
+          mc.type = adt;
 
           Monitor *a = make_monitor(alg, mc);
           Monitor *b = make_monitor(cmp, mc);

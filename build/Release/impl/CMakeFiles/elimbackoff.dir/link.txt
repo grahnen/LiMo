@@ -1,2 +1,0 @@
-/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libelimbackoff.a CMakeFiles/elimbackoff.dir/elimbackoff.cpp.o
-/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libelimbackoff.a

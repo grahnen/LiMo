@@ -1,2 +1,0 @@
-/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libcoarse_stack.a CMakeFiles/coarse_stack.dir/coarse_stack.cpp.o
-/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libcoarse_stack.a

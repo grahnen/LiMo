@@ -57,7 +57,7 @@ protected:
   int nOps;
 
 private:
-  int nConc, maxConc, totConc;
+int nConc, maxConc, totConc;
 
   void add_conc();
   void rem_conc();

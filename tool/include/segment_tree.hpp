@@ -29,7 +29,7 @@ class tsSegmentTree
 
 public:
 	// n number of timestamps
-	tsSegmentTree(std::vector<timestamp_t> &tsVec) : verbose(false),
+	tsSegmentTree(std::vector<timestamp_t> tsVec) : verbose(false),
 													 output(&std::cout)
 	{
 		std::size_t n = tsVec.size();
@@ -179,6 +179,15 @@ public:
 		return queryRec(idx, idx+1, 1, levels);
 	}
 
+	long long int elementLeft(timestamp_t ts)
+	{
+		size_t idx, idx2;
+		indexFromTs(timestamps.front(), ts, idx, idx2);
+		if(idx2 == 0)
+			return -1;
+		return queryRec(idx2-1, idx2, 1, levels);	
+	}
+
 private:
 	// returns range [idx1, idx2] for ts [ts1,ts2]
 	void indexFromTs(timestamp_t ts1, timestamp_t ts2, size_t &idx1, size_t &idx2)
@@ -261,7 +270,7 @@ private:
 			{
 				minIntervals[node] = minIntervals[2 * node + 1];
 			}
-			tree.at(node) = min(tree.at(2 * node), tree.at(2 * node + 1));
+			tree.at(node) = std::min(tree.at(2 * node), tree.at(2 * node + 1));
 		}
 	}
 

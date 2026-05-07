@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
   if (!get_options(argc, argv)) {
     return -1;
   }
+
+  std::cout << "Algorithm: " << algorithm << "\n";
   auto tr = clk::now();
   Configuration *c = read_log(filename);
   auto tr2 = clk::now();

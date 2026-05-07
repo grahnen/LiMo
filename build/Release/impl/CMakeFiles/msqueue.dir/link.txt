@@ -1,2 +1,0 @@
-/usr/bin/ar qc /mnt/d/Projects/LiMo/lib/libmsqueue.a CMakeFiles/msqueue.dir/msqueue.cpp.o
-/usr/bin/ranlib /mnt/d/Projects/LiMo/lib/libmsqueue.a

@@ -20,6 +20,9 @@ protected:
 
   DECLHANDLER(enq)
   DECLHANDLER(deq)
+  DECLHANDLER(push)
+  DECLHANDLER(pop)
+  
 
   void add_val(val_t v);
   void ensure_member(val_t v);

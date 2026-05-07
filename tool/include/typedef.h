@@ -108,16 +108,16 @@ inline std::istream& operator>>(std::istream& in, ADT &adt) {
   std::string token;
   in >> token;
   if(token == "stack" || token == "atomic-stack")
-    adt = stack;
+    adt = ADT::stack;
   else if (token == "queue")
-    adt = queue;
+    adt = ADT::queue;
   else if (token == "set")
-    adt = set;
-  if(token == "durable-stack")
+    adt = ADT::set;
+  else if(token == "durable-stack")
     adt = durable_stack;
-  if(token == "durable-queue")
+  else if(token == "durable-queue")
     adt = durable_queue;
-  if(token == "unknown-after")
+  else if(token == "unknown-after")
     adt = unknown_after;
   else
     in.setstate(std::ios_base::failbit);

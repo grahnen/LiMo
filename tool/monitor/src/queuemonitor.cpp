@@ -37,6 +37,7 @@ void QueueMonitor::handle_ret_enq(event_t &e) {
 
 void QueueMonitor::handle_deq(event_t &e) {
     active.insert_or_assign(e.thread, e.val.value());
+    
     ensure_member(e.val.value());
     inner.at(e.val.value()).ubound = e.timestamp;
     if(inner.at(e.val.value()).lbound > NEGINF)
@@ -54,6 +55,23 @@ void QueueMonitor::add_val(val_t v) {
     queue_tree.insert(n);
 }
 
+void QueueMonitor::handle_push(event_t& e)
+{
+    handle_enq(e);
+}
+void QueueMonitor::handle_pop(event_t& e)
+{
+    handle_deq(e);
+}
+void QueueMonitor::handle_ret_push(event_t& e)
+{
+    handle_ret_enq(e);
+}
+void QueueMonitor::handle_ret_pop(event_t& e)
+{
+    handle_ret_deq(e);
+}
+
 void QueueMonitor::print_state() const {
 
 }
@@ -63,9 +81,18 @@ void QueueMonitor::do_linearization() {
     ItvTree::Node *n = queue_tree.root;
     compute_k(n);
 
+    if(verbose)
+        for(auto &[v,i] : inner)
+        {
+            std::cout << "Inner:" << v<<": " << i << "\n";
+        }
+
     for(auto vl : outer) {
-        std::cout << "Outer: " << vl.first << ": " << vl.second << std::endl;
+        if(verbose)
+            std::cout << "Outer: " << vl.first << ": " << vl.second << std::endl;
         if(contains(n, vl.second)) {
+            if(verbose)
+                std::cout << "Violation in " << vl.first << ": " << vl.second;
             throw Violation("Unlinearizable: outer in cover!");
         }
     }
