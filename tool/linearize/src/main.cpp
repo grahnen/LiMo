@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   dur simpl_dur, lin_dur;
 
   try {
-    if(c->needs_simpl) {
+    if(c->needs_simpl && (c->type & (ADT::stack | ADT::queue))) {
       auto t = clk::now();
       Configuration *nc = simplify(c);
       auto t2 = clk::now();

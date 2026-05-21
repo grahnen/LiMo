@@ -14,7 +14,12 @@ const std::map<std::string, EType> str2evt = {
   {"Enq", EType::Eenq},
   {"deq", EType::Edeq},
   {"Deq", EType::Edeq},
+  {"write", EType::Ewrite},
+  {"Write", EType::Ewrite},
+  {"read", EType::Eread},
+  {"Read", EType::Eread},
   {"crash", EType::Ecrash},
+
   // Compatibility with logs from Violin
   {"add", EType::Eenq},
   {"remove", EType::Edeq},

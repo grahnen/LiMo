@@ -9,7 +9,9 @@
 #include "monitor/stackUnknownMonitor.hpp"
 #include "monitor/stackoptimalmonitor.hpp"
 #include "monitor/queue_naive.hpp"
+#include "monitor/registermonitor.hpp"
 #include "typedef.h"
+
 
 enum Algorithm : int
 {
@@ -25,6 +27,7 @@ enum Algorithm : int
   stack_optimal,
   queue_unknown,
   queue_unknown_naive,
+  register_itv,
 };
 
 #define DefaultAlgorithm Algorithm::undefined
@@ -39,6 +42,8 @@ inline Monitor *make_default(MonitorConfig mc)
     return (Monitor *)new CoverMonitor(mc);
   case ADT::durable_stack:
     return (Monitor *)new DurableStackMonitor(mc);
+  case ADT::registers:
+    return (Monitor*)new RegisterMonitor(mc);
   case ADT::durable_queue:
     return nullptr;
   }
@@ -78,7 +83,9 @@ inline Monitor *make_monitor(Algorithm alg, MonitorConfig mc)
     return (Monitor*)new QueueUnknownMonitor(mc);
   if (alg == queue_unknown_naive)
     return (Monitor*) new QueueNaiveUnknownMonitor(mc);
-  throw std::logic_error("Unknown algorithm! agl=" + ext2str(alg) + ", ADT=" + ext2str(mc.type));
+  if (alg == register_itv)
+    return (Monitor*) new RegisterMonitor(mc);
+  throw std::logic_error("Unknown algorithm! alg=" + ext2str(alg) + ", ADT=" + ext2str(mc.type));
   return nullptr;
 }
 
@@ -108,6 +115,8 @@ std::istream &operator>>(std::istream &in, Algorithm &alg)
     alg = queue_unknown;
   else if (token == "dqueue_unknown_naive")
     alg = queue_unknown_naive;
+  else if (token == "register" || token == "register_itv")
+    alg = register_itv;
   else
     in.setstate(std::ios_base::failbit);
 
@@ -142,6 +151,8 @@ std::ostream &operator<<(std::ostream &os, Algorithm &alg)
   case queue_unknown_naive:
     os << "dqueue_unknown_naive";
     break;
+  case register_itv:
+    os << "register_itv";
   }
   return os;
 }

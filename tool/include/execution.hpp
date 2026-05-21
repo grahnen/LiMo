@@ -26,8 +26,10 @@ Configuration *hist_from_ints(int count, int *data, ExhaustiveGenerator::History
   //   if (data[i] == -1)
   //     adt = ADT::durable_stack;
   // }
-  if(type != ExhaustiveGenerator::NORMAL)
+  if(type == ExhaustiveGenerator::UNKNOWN_AFTER)
     adt = ADT::durable_stack;
+  else if(type == ExhaustiveGenerator::REGISTER)
+    adt = ADT::registers;
 
   // std::cout<<"ADT is "<<adt<<"\n";
   Configuration *conf = new Configuration(history, adt, history.size(), (adt == ADT::stack));
@@ -87,7 +89,7 @@ ComparisonResult try_history(std::vector<event_t> &hist, Monitor *a, Monitor *b 
   } catch (Crash &c) {
     std::cout << c.what() << std::endl;
     return MonitorCrash;
-  }
+  } 
   if(b == nullptr)
     return a_res ? MatchLin : MatchViol;
   try {

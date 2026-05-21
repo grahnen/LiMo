@@ -21,6 +21,8 @@ const std::string etype_name[] = {
   "call add",
   "call rmv",
   "ctn",
+  "call write",
+  "call read",
   "crash",
   "nil"
 };

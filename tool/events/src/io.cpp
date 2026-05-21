@@ -100,6 +100,10 @@ ADT parse_type(std::string type) {
   {
     return unknown_after;
   }
+  else if(type.compare("register") == 0 || type.compare("registers") == 0)
+  {
+    return registers;
+  }
 
   else {
     throw std::logic_error("Unknown ADT: " + type);

@@ -1,0 +1,9 @@
+# @object register
+[1] call write(a)
+[1] return 
+[2] call write(b)
+[2] return 
+[1] call read(a)
+[1] return 
+[2] call read(b)
+[2] return

@@ -118,9 +118,11 @@ int main(int argc, char *argv[]) {
   switch (adt)
   {
   case ADT::unknown_after:
-      type = ExhaustiveGenerator::UNKNOWN_AFTER;
+      type = ExhaustiveGenerator::UNKNOWN_AFTER; 
       break;
-  
+  case ADT::registers:
+      type = ExhaustiveGenerator::REGISTER; 
+      break;
   default:
       // std::cout << "no!!!" << adt <<"-"<< int(ADT::unknown_after) <<"\n";
       break;
@@ -309,18 +311,30 @@ int main(int argc, char *argv[]) {
         // std::cout << "Generating with " << (max_crashes - num_crashes) << " crashes" << std::endl;
         auto generator = exGen.create_generator_prepended(n_elements, init_v, INT_MAX, max_thr);
         while(generator) {
+          // std::cout << "*** Started Generating" << std::endl;
           std::vector<int> int_h = generator();
-
+          // for(auto i : int_h)
+          //   std::cout << i << " ";
+          // std::cout << std::endl;
           Configuration *simpl = hist_from_ints(n_elements, int_h, type);
+          // std::cout << "*** Ended Generating" << std::endl;
           MonitorConfig mc;
           mc.thread_count = simpl->num_threads;
           // mc.type = simpl->type;
           mc.type = adt;
 
+          // std::cout  << "***  Making Monitor" << std::endl;
+
           Monitor *a = make_monitor(alg, mc);
           Monitor *b = make_monitor(cmp, mc);
 
+          // std::cout  << "*** Made Monitor" << std::endl;
+
+
+          // std::cout  << "*** Started Trying" << std::endl;
+
           ComparisonResult res = try_history(simpl->history, a, b);
+          // std::cout  << "*** Ended Trying" << std::endl;
 
           if(res == Mismatch) {
             // Mismatch found, send to root!

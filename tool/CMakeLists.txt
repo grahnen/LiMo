@@ -31,7 +31,6 @@ include_directories(include)
 
 add_subdirectory(events)
 add_subdirectory(monitor)
-
 add_subdirectory(builder)
 add_subdirectory(runner)
 add_subdirectory(impl)
@@ -41,6 +40,7 @@ add_subdirectory(linearize)
 add_subdirectory(exhaustive)
 add_subdirectory(automata_checker)
 add_subdirectory(random)
+add_subdirectory(generator)
 
 
 file(GLOB IMPL_SRC

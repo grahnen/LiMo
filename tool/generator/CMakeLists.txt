@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.18)
 
 project(random)
 
@@ -15,7 +15,7 @@ add_executable(generate "src/main.cpp")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(EXECUTABLES "random" "random_bench" "build_lin")
+set(EXECUTABLES "random" "random_bench" "build_lin" "generate")
 
 foreach(EXEC ${EXECUTABLES})
   target_compile_features(${EXEC} PUBLIC cxx_std_20)

@@ -33,7 +33,7 @@ int reps = 0;
 int increment = 0;
 int n_configs = 0;
 ADT adt;
-
+int num_crashes = 0;
 
 #if DEBUGGING
 int iterations = 0;
@@ -50,6 +50,7 @@ bool get_options(int argc, char *argv[]) {
       ("algorithm,a", value(&algorithm)->default_value(Algorithm::interval), "Algorithm (only for benchmark)")
       ("adt,d", value(&adt)->default_value(ADT::stack), "ADT to check")
       ("repetitions,r", value(&reps)->default_value(1)->implicit_value(10), "Number of repetitions")
+    //   ("crashes,c", value(&num_crashes)->default_value(0), "Number of crashes")
       ("suite", value(&suite)->required())
       ("output", value(&filename)->required(), "Output file");
 
@@ -143,12 +144,15 @@ int main(int argc, char *argv[]) {
     case unknown_after:
         type = ExhaustiveGenerator::UNKNOWN_AFTER;
         break;
-    
+    case registers:
+        type = ExhaustiveGenerator::REGISTER;
+        break;
     default:
         break;
     }
 
     exGen.setHistoryType(type);
+    // exGen.setNumCrashes(num_crashes);
 
 
     std::random_device rd;
@@ -162,13 +166,14 @@ int main(int argc, char *argv[]) {
         }
 
         for(int i = 0; i < num_iters_per; i++) {
+            // std::cout << "here";
             Monitor *m = 0;
             Configuration *conf = 0;
 
             #if KEEP_ONLY_LIN
 
             //include this in suite/configuration
-            exGen.setNumCrashes(cfg.values/2);
+            exGen.setNumCrashes(cfg.values/10);
 
             std::vector<int> history = exGen.create_single(cfg.values, cfg.threads, rng);
 
@@ -178,9 +183,11 @@ int main(int argc, char *argv[]) {
 
             m = make_monitor(algorithm, mc);
 
+            // std::cout << "Starting\n";
             double start = MPI_Wtime();
             bool res = try_hist(m, conf->history);
             double stop = MPI_Wtime();
+            // std::cout << "Ended\n";
 
             #else
 // Old stuff
@@ -206,6 +213,7 @@ int main(int argc, char *argv[]) {
             #endif
 
             benchmark_results[c * num_iters_per + i] = stop-start;
+            std::cout << ""
 
             delete m;
             delete conf;

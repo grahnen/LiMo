@@ -22,11 +22,20 @@ protected:
 	bool unlin = false;
 	std::map<val_t, RegValue> values;
 	std::map<tid_t, event_t> active;
+	std::vector<timestamp_t> times;
+
+	void add_time(timestamp_t t)
+	{
+		if(times.size() == 0 || times.back() != t)
+		{
+			times.push_back(t);
+		}
+	}
 
 	DECLHANDLER(write);
 	DECLHANDLER(read);
-	DECLHANDLER(push); // push <-> write
-	DECLHANDLER(pop);  // pop  <-> read 
+	// DECLHANDLER(push); // push <-> write
+	// DECLHANDLER(pop);  // pop  <-> read 
 
 	void handle_crash(event_t& e);
 

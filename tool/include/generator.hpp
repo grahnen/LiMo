@@ -21,6 +21,7 @@ public:
 		KNOWN_AFTER,
 		UNKNOWN_BEFORE,
 		UNKNOWN_AFTER,
+		REGISTER,
 	};
 
 	ExhaustiveGenerator()
@@ -187,7 +188,7 @@ private:
 
 		static event_t getEventFromEv(ev_t ev, timestamp_t ts)
 		{
-			auto &[type, th] = ev;
+			auto &[type, th, v] = ev;
 			if(type == Ecrash)
 			{
 				return event_t(Ecrash, -1, {}, ts);
@@ -279,8 +280,201 @@ private:
 	
 		static inline event_t getEventFromEv(ev_t ev, timestamp_t ts)
 		{
-			auto &[type, th] = ev;
+			auto &[type, th, v] = ev;
 			return event_t(type, th, val_t(th, 0), ts);
+		}
+	};
+
+	struct RegisterState
+	{
+		/**
+		 * W - no. of values 
+		 * R - max. no. of reads (set to 2 * W)
+		 * 
+		 * events
+		 * 		[0, W-1] -> denote write(i), write_ret
+		 *      [W, W+R-1] -> denote read_call
+		 * 	    W+R -> dentotes crash
+		 * 
+		 * For reads, we give the value of either the last returned write, or currently active writes
+		 * 
+		 * states:
+		 *  UNSTARTED 
+		 *  CALLED 
+		 *  RETURNED
+		 *  CRASHED
+		 * 
+		 * 
+		 */
+		std::vector<char> state;
+		int sz;
+		int numWrites;
+		int numCrashes;
+		int activeOps;
+
+		std::set<int> active_writes;
+		int last_completed_write;
+
+		static constexpr char UNSTARTED = 2;
+		static constexpr char PENDING = 1;
+		static constexpr char COMPLETED = 0;
+		static constexpr char ABORTED = -1;
+
+		static constexpr int READ_RET_BASE = 10000;
+		static constexpr int READ_RET_MULT = 10000;
+
+	public:
+		// Encode a read return -- need to encode a value as well
+		static int encode_read_return(int read_idx, int value) {
+			return READ_RET_BASE + (read_idx * READ_RET_MULT) + (value + 1);
+		}
+
+		// Decode the integer back into operation and value
+		static void decode_action(int action, int& op_idx, int& read_val) {
+			if (action < READ_RET_BASE) {
+				op_idx = action;
+				read_val = -1;
+			} else {
+				int rem = action - READ_RET_BASE;
+				op_idx = rem / READ_RET_MULT;
+				read_val = (rem % READ_RET_MULT) - 1;
+			}
+		}
+
+		inline void initialize(int writes )
+		{
+			sz = writes * 2;
+			numWrites = writes; 
+			state.clear();
+			state.resize(sz, UNSTARTED);
+			numCrashes = 0;
+			activeOps  = 0;
+			
+			active_writes.clear();
+			last_completed_write = -1; // -1 represents the initial value of the register
+		}
+
+		inline bool check_done()
+		{
+			bool all_finished = std::all_of(state.begin(), state.end(), [](char i){
+				return i == COMPLETED || i == ABORTED;
+			});
+			return all_finished && (numCrashes == ExhaustiveGenerator::crashes) && (activeOps == 0);
+		}
+		
+		inline void update(int x)
+		{
+			//crash
+			if (x == sz) 
+			{
+				numCrashes++;
+				activeOps = 0;
+				active_writes.clear(); // Active writes drop on crash
+				
+				for (int i = 0; i < sz; i++) {
+					if (state[i] == PENDING) state[i] = ABORTED; 
+				}
+				return;
+			}
+
+			int op_idx, read_val;
+			decode_action(x, op_idx, read_val);
+
+			if (state.at(op_idx) == UNSTARTED) {
+				state.at(op_idx) = PENDING;
+				activeOps++;
+				if (op_idx < numWrites) {
+					active_writes.insert(op_idx);
+				}
+			} 
+			else if (state.at(op_idx) == PENDING) {
+				state.at(op_idx) = COMPLETED;
+				activeOps--;
+				if (op_idx < numWrites) {
+					active_writes.erase(op_idx);
+					last_completed_write = op_idx;
+				}
+			}
+		}
+
+		std::set<int> possible_indices(tid_t max_conc = MAX_THREADS)
+		{
+			if (check_done()) return {};
+
+			std::set<int> pinds;
+
+			// 1. Pending operations can return
+			for (int i = 0; i < sz; i++) {
+				if (state.at(i) == PENDING) {
+					if (i < numWrites) {
+						pinds.insert(i); 
+					} else {
+						pinds.insert(encode_read_return(i, last_completed_write));
+						for (int active_val : active_writes) {
+							pinds.insert(encode_read_return(i, active_val));
+						}
+					}
+				}
+			}
+
+			if (activeOps < max_conc)
+			{
+				for (int i = 0; i < numWrites; i++) {
+					if (state.at(i) == UNSTARTED) { pinds.insert(i); break; }
+				}
+				for (int i = numWrites; i < sz; i++) {
+					if (state.at(i) == UNSTARTED) { pinds.insert(i); break; }
+				}
+			}
+
+			if (numCrashes < ExhaustiveGenerator::crashes && activeOps > 0) {
+				pinds.insert(sz);
+			}
+
+			return pinds;
+		}
+
+		ev_t getAndUpdate(int x)
+		{
+			if (x == sz) {
+				update(x);
+				return ev_t(Ecrash, -1, 0);
+			}
+
+			int op_idx, read_val;
+			decode_action(x, op_idx, read_val);
+			
+			char currentState = state.at(op_idx);
+			bool isWrite = (op_idx < numWrites);
+			
+			update(x);
+			
+			if (currentState == UNSTARTED) {
+				return isWrite ? ev_t(Ewrite, op_idx, val_t(op_idx, op_idx)) : ev_t(Eread, op_idx, val_t(op_idx, -1));
+			} else if (currentState == PENDING) {
+				int return_value = isWrite ? op_idx : read_val; 
+				return ev_t(Ereturn, op_idx, val_t(return_value, return_value)); 
+			}
+			
+			throw std::logic_error("Invalid state");
+		}
+
+		static event_t getEventFromEv(ev_t ev, timestamp_t ts)
+		{
+			auto &[type, th, val] = ev; 
+			
+			if (type == Ecrash) {
+				return event_t(Ecrash, -1, {}, ts);
+			} 
+			else if (type == Ewrite) {
+				return event_t(Ewrite, th, val_t(th, th), ts); 
+			}
+			else if (type == Eread) {
+				return event_t(Eread, th, {}, ts);
+			}
+			else { 
+				return event_t(Ereturn, th, (val.idx == -1 ? optval_t{} : val_t(val)), ts); 
+			}
 		}
 	};
 
@@ -369,23 +563,25 @@ public:
 	{
 		EType t;
 		tid_t th;
-		inline ev_t(EType t, tid_t th) : t(t), th(th) {}
+		val_t v;
+		inline ev_t(EType t, tid_t th) : t(t), th(th), v(-1) {}
+		inline ev_t(EType t, tid_t th, val_t v) : t(t), th(th), v(v) {} 
 	};
 
-	static inline ev_t evt(int i, char state)
+	static inline ev_t evt(int i, char state, val_t v = -1)
 	{
 		switch (state)
 		{
 		case 4:
-			return ev_t(Epush, i);
+			return ev_t(Epush, i, v);
 		case 3:
-			return ev_t(Ereturn, i);
+			return ev_t(Ereturn, i, v);
 		case 2:
-			return ev_t(Epop, i);
+			return ev_t(Epop, i, v);
 		case 1:
-			return ev_t(Ereturn, i);
+			return ev_t(Ereturn, i, v);
 		case -1:
-			return ev_t(Ecrash, -1);
+			return ev_t(Ecrash, -1, v);
 		}
 		// Error
 		return ev_t(Enil, i);
@@ -646,7 +842,7 @@ public:
 
 
 
-	static std::vector<ev_t> make_history(int size, int *events, int type = NORMAL)
+	static std::vector<ev_t> make_history(int size, int *events, int type)
 	{
 		switch(type)
 		{
@@ -654,13 +850,15 @@ public:
 				return make_history<NormalState>(size, events);
 			case UNKNOWN_AFTER:
 				return make_history<DurableUnknownState>(size, events);
+			case REGISTER:
+				return make_history<RegisterState>(size, events);
 			default:
 				throw std::logic_error("Unimplemented");
 		}
 		return make_history(size, events,type);
 	}
 
-	static std::vector<ev_t> make_history(int size, std::vector<int> &events, int type = NORMAL)
+	static std::vector<ev_t> make_history(int size, std::vector<int> &events, int type)
 	{
 		switch(type)
 		{
@@ -668,6 +866,8 @@ public:
 				return make_history<NormalState>(size, events.data());
 			case UNKNOWN_AFTER:
 				return make_history<DurableUnknownState>(size, events.data());
+			case REGISTER:
+				return make_history<RegisterState>(size, events.data());
 			default:
 				throw std::logic_error("Unimplemented");
 		}
@@ -678,21 +878,31 @@ public:
 	//extend this function to generate durable histories
 	inline std::vector<int> create_single(int size, tid_t max_threads, std::mt19937_64 &rand)
 	{
-		NormalState initNormal;
-		DurableUnknownState initUA;
 		switch (genHistoryType)
 		{
-			case HistoryType::NORMAL:
+			case NORMAL:
+			{
+				NormalState initNormal;
 				initNormal.initialize(size);
 				return gen_single(initNormal, max_threads, rand);
-			case HistoryType::UNKNOWN_AFTER:
+			}
+			case UNKNOWN_AFTER:
+			{
+				DurableUnknownState initUA;
 				initUA.initialize(size);
 				return gen_single(initUA, max_threads, rand);
+			}
+			case REGISTER:
+			{
+				RegisterState initRS;
+				initRS.initialize(size);
+				return gen_single(initRS, max_threads, rand);
+			}
 			default:
 				throw std::logic_error("unhandled history type");
 		}
 
-		return gen_single(initNormal, max_threads, rand);
+		// return gen_single(initNormal, max_threads, rand);
 	}
 
 
@@ -704,6 +914,8 @@ public:
 				return create_generator_prepended<NormalState>(size, events, num_new, max_threads);
 			case UNKNOWN_AFTER:
 				return create_generator_prepended<DurableUnknownState>(size, events, num_new, max_threads);
+			case REGISTER:
+				return create_generator_prepended<RegisterState>(size, events, num_new, max_threads);
 			default:
 				throw std::logic_error("Unimplemented");
 				return create_generator_prepended<NormalState>(size, events, num_new, max_threads);
@@ -727,31 +939,20 @@ public:
 
 	std::vector<std::vector<int>> create_inits(int size, int min_amt, tid_t max_threads = MAX_THREADS)
 	{
-		if (genHistoryType == UNKNOWN_AFTER)
+		switch(genHistoryType)
 		{
-			return create_inits_durable_unknown(size, min_amt, max_threads);
+			case NORMAL:
+				return create_inits_normal(size, min_amt, max_threads);
+			case UNKNOWN_AFTER:
+				return create_inits_durable_unknown(size, min_amt, max_threads);
+			case REGISTER:
+				return create_inits_register(size, min_amt, max_threads);
+			default:
+				throw std::logic_error("Unimplemented type");
 		}
-
-		std::vector<std::vector<int>> histories{std::vector<int>{0}};
-		std::vector<std::vector<int>> new_histories;
-		int remaining = size * 4 - 1;
-		while ((histories.size() < min_amt) && remaining != 0)
-		{
-			remaining--;
-			new_histories.clear();
-			for (auto h : histories)
-			{
-				auto gen = create_generator_prepended<NormalState>(size, h, 1, max_threads);
-				while (gen)
-					new_histories.push_back(gen());
-			}
-			histories.clear();
-			histories = new_histories;
-		}
-		return histories;
 	}
 
-	static inline event_t getEventFromEv(ev_t ev, timestamp_t ts, HistoryType type=NORMAL)
+	static inline event_t getEventFromEv(ev_t ev, timestamp_t ts, HistoryType type)
 	{
 		switch(type)
 		{
@@ -759,6 +960,8 @@ public:
 				return NormalState::getEventFromEv(ev, ts);
 			case UNKNOWN_AFTER:
 				return DurableUnknownState::getEventFromEv(ev, ts);
+			case REGISTER:
+				return RegisterState::getEventFromEv(ev, ts);
 			default:
 				throw std::logic_error("unknown type");
 		}
@@ -859,6 +1062,56 @@ private:
 			{
 				// assert(false);
 				auto gen = create_generator_prepended<DurableUnknownState>(size, h, 1, max_threads);
+				while (gen)
+					new_histories.push_back(gen());
+			}
+			histories.clear();
+			histories = new_histories;
+		}
+		return histories;
+	}
+
+	inline std::vector<std::vector<int>> create_inits_register(int size, int min_amt, tid_t max_threads)
+    {
+        std::vector<std::vector<int>> histories{std::vector<int>{0}};
+        
+        std::vector<std::vector<int>> new_histories;
+        
+        int remaining = size * 12 - 1; 
+        
+        while ((histories.size() < min_amt) && remaining != 0)
+        {
+            remaining--;
+            new_histories.clear();
+            
+            for (auto h : histories)
+            {
+                // Pass RegisterState to the templated generator
+                auto gen = create_generator_prepended<RegisterState>(size, h, 1, max_threads);
+                while (gen)
+                {
+                    new_histories.push_back(gen());
+                }
+            }
+            
+            histories = std::move(new_histories); 
+        }
+        
+        return histories;
+    }
+
+	inline std::vector<std::vector<int>> create_inits_normal(int size, int min_amt, tid_t max_threads)
+	{
+		std::vector<std::vector<int>> histories{std::vector<int>{0}};
+		std::vector<std::vector<int>> new_histories;
+		int remaining = size * 4 - 1;
+		while ((histories.size() < min_amt) && remaining != 0)
+		{
+			remaining--;
+			new_histories.clear();
+			for (auto h : histories)
+			{
+				auto gen = create_generator_prepended<NormalState>(size, h, 1, max_threads);
 				while (gen)
 					new_histories.push_back(gen());
 			}

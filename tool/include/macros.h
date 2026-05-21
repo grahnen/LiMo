@@ -4,7 +4,7 @@
 #include <boost/preprocessor/tuple.hpp>
 #include <boost/preprocessor/seq.hpp>
 
-#define EVT_TYPE (return,push,pop,enq,deq,add,rmv,ctn,crash,nil)
+#define EVT_TYPE (return,push,pop,enq,deq,add,rmv,ctn,write,read,crash,nil)
 #define OP_TYPE (push,pop,enq,deq,add,rmv,ctn,write,read,nil)
 
 #define EVT_TYPE_SEQ BOOST_PP_TUPLE_TO_SEQ(EVT_TYPE)

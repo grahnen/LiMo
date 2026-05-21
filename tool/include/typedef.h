@@ -87,6 +87,7 @@ set = 1 << 3,
 durable_stack = 1 << 4,
 durable_queue = 1 << 5,
 unknown_after = 1 << 6,
+registers = 1 << 7,
 };
 
 inline constexpr ADT operator|(const ADT &a, const ADT &b) {
@@ -119,8 +120,13 @@ inline std::istream& operator>>(std::istream& in, ADT &adt) {
     adt = durable_queue;
   else if(token == "unknown-after")
     adt = unknown_after;
+  else if(token == "register" || token == "registers")
+    adt = registers;
   else
+  {
     in.setstate(std::ios_base::failbit);
+    throw std::logic_error("unknown adt " + token);
+  }
 
   return in;
 }
@@ -164,6 +170,13 @@ inline constexpr std::ostream &operator<<(std::ostream &os, const ADT &a) {
       os << " | ";
     }
   }
+  if(c & registers) {
+    os << "registers";
+    c ^= registers;
+    if(c > 0) {
+      os << " | ";
+    }
+  }
   if(c & unknown_after) {
     os << "unknown-after";
     c ^= unknown_after;
@@ -171,6 +184,7 @@ inline constexpr std::ostream &operator<<(std::ostream &os, const ADT &a) {
       os << " | ";
     }
   }
+
   return os;
 }
 
